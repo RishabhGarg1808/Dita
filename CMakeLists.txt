@@ -1,0 +1,75 @@
+cmake_minimum_required(VERSION 3.28)
+project(Dita)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+set(CORE
+        core/analyzer/ip_analyzer.cpp
+        core/analyzer/ssh_analyzer.cpp
+        core/analyzer/tcp_analyzer.cpp
+        core/analyzer/protocol_analyzer.cpp
+
+        #utils
+        core/analyzer/utils/defines.h
+        core/analyzer/utils/ip_utils.cpp
+        core/analyzer/utils/map_util.cpp
+)
+set(UI
+        Graph/Graph.cpp
+        Graph/Graph.h
+        DevHandler.cpp
+        DevHandler.h
+        ui/line_graph.cpp
+        ui/alert_tab.cpp
+        ui/stats_view.cpp
+        ui/netutil_tab.cpp
+        ui/netutil_tab.h
+)
+
+set (NETHOGS
+        core/nethogs/src/connection.cpp
+        core/nethogs/src/conninode.cpp
+        core/nethogs/src/cui.cpp
+        core/nethogs/src/decpcap.cpp
+        core/nethogs/src/devices.cpp
+        core/nethogs/src/inode2prog.cpp
+        core/nethogs/src/nethogs.h
+        core/nethogs/src/packet.cpp
+        core/nethogs/src/process.cpp
+        ui/line.cpp
+        ui/line.h
+
+)
+
+find_package(Qt6 COMPONENTS REQUIRED
+        Core
+        Gui
+        Widgets
+        PrintSupport
+        Charts
+)
+find_package(PcapPlusPlus CONFIG REQUIRED)
+
+add_executable(Dita main.cpp ${CORE} ${UI} ${NETHOGS}
+        mainwindow.cpp
+        mainwindow.h
+        mainwindow.ui)
+
+target_link_libraries(Dita
+        Qt::Core
+        Qt::Gui
+        Qt::Widgets
+        Qt::PrintSupport
+        Qt::Charts
+        #PcapPlusPlus Links
+        PCAP::PCAP
+        PcapPlusPlus::Pcap++
+        PcapPlusPlus::Common++
+        PcapPlusPlus::Packet++
+        ncurses
+)
+
+target_include_directories(Dita PRIVATE core/nethogs/src)
