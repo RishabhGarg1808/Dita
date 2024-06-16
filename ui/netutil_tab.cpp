@@ -33,24 +33,6 @@ void forceExit(bool success,const char* msg,...) {
         exit(EXIT_FAILURE);
 }
 
-
-//extern Process *unknownudp;
-//
-//time_t refreshdelay = 1;
-//unsigned refreshlimit = 0;
-//unsigned refreshcount = 0;
-//unsigned processlimit = 0;
-//bool tracemode = false;
-//bool bughuntmode = false;
-//// sort on sent or received?
-//bool sortRecv = true;
-//bool showcommandline = false;
-//bool showBasename = false;
-//// viewMode: kb/s or total
-//int viewMode = VIEWMODE_KBPS;
-//const char version[] = " 0.0 ";
-//timeval curtime;
-
 std::list<handle> handles;
 
 //utils function to dislapy error messages in ui
@@ -203,13 +185,12 @@ Nethogs::Nethogs() {
         forceExit("Error opening pcap handlers for all devices.\n", 0);
     }
 
-    //signal(SIGINT, &nethogs::quit_cb);
+
 
     userdata = (dpargs *) malloc(sizeof(struct dpargs));
 }
 
 void Nethogs::update() {
-    std::cout << "Update called\n" << std::flush;
     refreshconninode();
     refreshcount++;
 
@@ -269,7 +250,6 @@ void Nethogs::update() {
     //trigger the update of the table
     QVector<Line*> linesVector(lines,lines+n);
     emit updateNetUtilSignal(linesVector, nproc);
-    std::cout << "Emitted\n" << std::flush;
     if (refreshlimit != 0 && refreshcount >= refreshlimit)
         quit_cb(0);
 }
