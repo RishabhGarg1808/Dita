@@ -1,11 +1,10 @@
-
 #include <QComboBox>
 #include <QTextBrowser>
 #include "../ui_mainwindow.h"
 #include "../mainwindow.h"
-
+std::string interface_ipv4;
+std::string interface_ipv6;
 void *MainWindow::initStats(){
-
     //Tamper the below html builder at your own risk
     QString htmlTemplate = R"(
           <div style='text-align: center;'><h3>INTERFACE STATS</h3></div>
@@ -50,6 +49,8 @@ void *MainWindow::initStats(){
             QString::number(DevHandle.getDev()->getMtu())
             );
     ui->devStats->setHtml(htmlContent);
+    interface_ipv4 = DevHandle.getDev()->getIPv4Address().toString();
+    interface_ipv6 = DevHandle.getDev()->getIPv6Address().toString();
     return nullptr;
 }
 
@@ -68,6 +69,8 @@ void MainWindow::reinit() {
     DevHandle.stop_capture();
     DevHandle.select_dev(ui->comboBox->currentIndex()+1);
     DevHandle.start_capture();
+    interface_ipv4 = DevHandle.getDev()->getIPv4Address().toString();
+    interface_ipv6 = DevHandle.getDev()->getIPv6Address().toString();
     initStats();
 }
 

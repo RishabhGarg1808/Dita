@@ -307,12 +307,13 @@ void Nethogs::start() {
 void MainWindow::initNetUtil() {
 
     statsModel =  new QStandardItemModel(0,5,this);
-    statsModel->setHorizontalHeaderLabels(QStringList() << "PID"  <<"User" << "Name"
+    statsModel->setHorizontalHeaderLabels(QStringList() << "PID"  <<"User" << "Program"
                                                         << "Device" << "Sent" << "Received" );
 
     ui->netTabel->setModel(statsModel);
     ui->netStats->resizeRowsToContents();
-    ui->netTabel->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->netTabel->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->netTabel->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
     ui->netTabel->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->netTabel->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->netTabel->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -328,4 +329,44 @@ void MainWindow::initNetUtil() {
     ui->netStats->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->netStats->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->netStats->setSelectionMode(QAbstractItemView::SingleSelection);
+}
+
+void MainWindow::updateNetUtil(QVector<Line *> data, int n) {
+    for(int i = 0; i < n; i++){
+        Line *line = data[i];
+        if (i < statsModel->rowCount()) {
+            // Update existing and if pid == 0 skip
+            if(line->m_pid == 0) continue;
+            statsModel->item(i, 0)->setText(QString::fromStdString(std::to_string(line->m_pid)));
+            statsModel->item(i, 1)->setText(QString::fromStdString(std::to_string(line->m_uid)));
+            statsModel->item(i, 2)->setText(QString::fromStdString(line->m_name));
+            statsModel->item(i, 3)->setText(QString::fromStdString(line->devicename));
+            statsModel->item(i, 4)->setText(QString::number(line->sent_value,'f',2));
+            statsModel->item(i, 5)->setText(QString::number(line->recv_value,'f',2));
+        } else {
+            // Add new row if it doesn't exist and check for pid != 0
+            if(line->m_pid == 0) continue;
+            QList<QStandardItem *> items;
+            items.append(new QStandardItem(QString::fromStdString(std::to_string(line->m_pid))));
+            items.append(new QStandardItem(QString::fromStdString(std::to_string(line->m_uid))));
+            items.append(new QStandardItem(QString::fromStdString(line->m_name)));
+            items.append(new QStandardItem(QString::fromStdString(line->devicename)));
+            items.append(new QStandardItem(QString::number(line->sent_value,'f',2) + unit));
+            items.append(new QStandardItem(QString::number(line->recv_value,'f',2) +unit ));
+            statsModel->appendRow(items);
+        }
+    }
+    float total_sent =0;
+    float total_recv =0;
+
+    for(int i = 0; i < statsModel->rowCount(); i++){
+        QStandardItem *sent = statsModel->item(i, 4);
+        QStandardItem *recv = statsModel->item(i, 5);
+        total_sent += (sent->text().split(unit)).first().toFloat();
+        total_recv += (recv->text().split(unit)).first().toFloat();
+    }
+    QString proc= QString::fromStdString("\u2211 Processes : " + std::to_string(statsModel->rowCount()));
+    QString sent= QString::fromStdString("\u2211 Sent : " + QString::number(total_sent,'f',2).toStdString()  + " KBps");
+    QString recv= QString::fromStdString( "\u2211 Received : " + QString::number(total_recv,'f',2).toStdString() + " KBps");
+    totalModel->setHorizontalHeaderLabels(QStringList() << sent<< recv << proc);
 }

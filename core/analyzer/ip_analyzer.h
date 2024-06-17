@@ -14,8 +14,6 @@
 #include <set>
 #include <vector>
 
-
-
 void ipv4_analyze(pcpp::Packet* );
 void ipv6_analyze(pcpp::Packet* );
 void sortIPs();

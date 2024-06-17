@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>811</width>
-    <height>455</height>
+    <width>1086</width>
+    <height>489</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>811</width>
-    <height>455</height>
+    <width>1086</width>
+    <height>489</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -52,7 +52,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QListWidget" name="service_list">
+          <widget class="QTreeView" name="servTree">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>

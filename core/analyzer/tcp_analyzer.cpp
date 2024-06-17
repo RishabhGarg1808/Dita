@@ -70,7 +70,7 @@ void tcp_analyze(pcpp::Packet *Packet) {
     * if the packet originated from the local_machine classify the connection as outgoing
     * else classify the connection as incoming
     */
-    if (TcpLayer->getTcpHeader()->synFlag == 1 && TcpLayer->getTcpHeader()->ackFlag == 1) {
+    if (TcpLayer->getTcpHeader()->synFlag == 1 || TcpLayer->getTcpHeader()->ackFlag == 1) {
         if (check_list(Packet_dest)) {
             TCP_PendingConnectionWatchList.remove(Packet_dest);
         }
@@ -78,7 +78,7 @@ void tcp_analyze(pcpp::Packet *Packet) {
             TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, true) ,port_pair);
         } else {
             if(checkifOutgoing(Packet_dest)){
-            TCP_update_map(TCP_ConnectionMap_incoming,std::make_pair(Packet_src,true), port_pair);
+            TCP_update_map(TCP_ConnectionMap_incoming,std::make_pair(Packet_dest,true), port_pair);
             }
         }
     }
@@ -93,7 +93,7 @@ void tcp_analyze(pcpp::Packet *Packet) {
                 TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, false) , port_pair);
             } else {
                 if(checkifOutgoing(Packet_src))
-                TCP_update_map(TCP_ConnectionMap_incoming, std::make_pair(Packet_dest, false), port_pair);
+                TCP_update_map(TCP_ConnectionMap_incoming, std::make_pair(Packet_src, false), port_pair);
             }
 
     }

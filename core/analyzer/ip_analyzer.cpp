@@ -7,9 +7,7 @@
 std::map<std::string ,int> ipCount;
 std::multimap<int , std::string> SortedIPs;
 
-// IMPORTANT : Remove this deceleration ,it was only used to test the function
-std::string interface_ipv4;
-std::string interface_ipv6;
+
 
 int DROPPED_IPv4=0;
 int DROPPED_IPv6=0;
