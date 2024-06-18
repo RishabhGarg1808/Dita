@@ -12,7 +12,7 @@ int DROPPED_SSH=0;
     true :  indicates the connection is alive
     Both are used in the currSSH map to determine whether the connection is alive or not
 */
-std::map<std::string ,bool> SSH_ConnectionMap;
+std::map<std::string ,std::string> SSH_ConnectionMap;
 
 void sshAnalyze(pcpp::Packet* Packet){
 
@@ -25,11 +25,11 @@ void sshAnalyze(pcpp::Packet* Packet){
             auto *tcpLayer = Packet->getLayerOfType<pcpp::TcpLayer>();
             if(tcpLayer->getTcpHeader()->rstFlag == 1 || tcpLayer->getTcpHeader()->finFlag == 1){
                 //Update the IP as no longer maintaining an ssh connection
-                SSH_update_map(SSH_ConnectionMap, ip,false);
+                SSH_update_map(SSH_ConnectionMap, ip,"Dead");
             }else{
                 //Update the IP is still maintaining a connection
                 if(ip != interface_ipv4 && ip != interface_ipv6)
-                SSH_update_map(SSH_ConnectionMap, ip, true);
+                SSH_update_map(SSH_ConnectionMap, ip, "Alive");
             }
         }else{
             DROPPED_SSH++;

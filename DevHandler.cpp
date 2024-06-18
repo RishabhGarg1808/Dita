@@ -4,7 +4,6 @@
 
 DevHandler::DevHandler() {
     int ret = pcap_findalldevs(&alldevsp,errbuf);
-
     if(ret>0){
         auto messagebox = new QMessageBox();
         messagebox->setWindowTitle("Error!");
@@ -45,7 +44,11 @@ void DevHandler::start_capture() {
     dev->startCapture(Graph::onPacketArrives, &graph);
 }
 
-void DevHandler::select_dev(int dev_sel){;
+void DevHandler::select_dev(int dev_sel){
+    if(dev_list.empty()) {
+        std::cerr << "Device list is empty." << std::endl;
+        exit(1);
+    }
     temp = alldevsp;
     if(dev_sel >= 1 && dev_sel<= cntr){
         for(int i=1;i<=dev_sel;i++){

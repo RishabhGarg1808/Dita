@@ -37,4 +37,7 @@ void packetSwitcher(pcpp::Packet *packet){
     if(packet->isPacketOfType(pcpp::TCP)){
         tcp_analyze(packet);
     }
+    if(packet->isPacketOfType(pcpp::UDP)){
+        udp_analyze(packet);
+    }
 }

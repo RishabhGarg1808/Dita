@@ -27,15 +27,15 @@ private slots:
     void updateServiceStats();
 
 private:
-    QString unit = "KBps";
+    QString unit = " KBps";
     Ui::MainWindow *ui;
     QLineSeries *TCP{}, *UDP{}, *HTTP{}, *ICMP{}, *SSL{}, *SSH{};
-    QTimer *timer;
+    QTimer *timer,*timer2;
     DevHandler DevHandle;
     QDateTime time = QDateTime::currentDateTime();
     QStandardItemModel *totalModel,*statsModel,*serviceModel;
     QStandardItem *ssh,*tcp,*udp;
-
+    QStandardItem *UdpIncoming,*UdpOutgoing,*TcpIncoming,*TcpOutgoing;
 private:
     QChart *initChart();
     void initDevList();
@@ -43,6 +43,13 @@ private:
     void *initService();
     void initNetUtil();
     void *initStats();
+
+//functions  for the service tab
+    void update_tcp();
+    void update_udp();
+//    void update_http();
+//    void update_icmp();
+    void update_ssh();
 };
 
 

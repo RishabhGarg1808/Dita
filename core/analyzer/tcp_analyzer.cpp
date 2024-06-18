@@ -6,13 +6,9 @@
 #include <list>
 #include <algorithm>
 
-/* false : indicates the connection is dead(or previously requested)
- *  true :  indicates the connection is alive
- *  Both are used in the TCP map to determine whether the connection is alive or not
- */
 
-std::map<std::pair<std::string,bool> ,std::pair<int,int>> TCP_ConnectionMap_incoming;
-std::map<std::pair<std::string,bool> ,std::pair<int,int>> TCP_ConnectionMap_outgoing;
+map<pair<string,string> ,pair<int,int>> TCP_ConnectionMap_incoming;
+map<pair<string,string> ,pair<int,int>> TCP_ConnectionMap_outgoing;
 
 std::list<std::string> TCP_PendingConnectionWatchList;
 
@@ -26,7 +22,7 @@ bool check_list(const std::string& ip_packet){
     if(TCP_PendingConnectionWatchList.empty()){
         return false;
     }else{
-        auto it = std::find(TCP_PendingConnectionWatchList.begin(),
+        auto it = find(TCP_PendingConnectionWatchList.begin(),
                             TCP_PendingConnectionWatchList.end(),
                             ip_packet);
         if(it != TCP_PendingConnectionWatchList.end()) {
@@ -39,8 +35,8 @@ bool check_list(const std::string& ip_packet){
 }
 bool checkifOutgoing(const std::string& IP){
 
-    auto it = TCP_ConnectionMap_outgoing.find(std::make_pair(IP, true));
-    auto it_another = TCP_ConnectionMap_outgoing.find(std::make_pair(IP,false));
+    auto it = TCP_ConnectionMap_outgoing.find(std::make_pair(IP, "Alive"));
+    auto it_another = TCP_ConnectionMap_outgoing.find(std::make_pair(IP,"Dead"));
 
     if(it != TCP_ConnectionMap_outgoing.end() || it_another != TCP_ConnectionMap_outgoing.end()){
         return true;
@@ -53,7 +49,7 @@ bool checkifOutgoing(const std::string& IP){
 void ssh_close(const std::string& src){
     auto it = SSH_ConnectionMap.find(src);
     if(it != SSH_ConnectionMap.end()) {
-        SSH_update_map(SSH_ConnectionMap, src, false);
+        SSH_update_map(SSH_ConnectionMap, src, "Dead");
     }
 }
 
@@ -75,10 +71,10 @@ void tcp_analyze(pcpp::Packet *Packet) {
             TCP_PendingConnectionWatchList.remove(Packet_dest);
         }
         if (Packet_src == interface_ipv4 || Packet_src == interface_ipv6) {
-            TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, true) ,port_pair);
+            TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, "Alive") ,port_pair);
         } else {
             if(checkifOutgoing(Packet_dest)){
-            TCP_update_map(TCP_ConnectionMap_incoming,std::make_pair(Packet_dest,true), port_pair);
+            TCP_update_map(TCP_ConnectionMap_incoming,std::make_pair(Packet_src,"Alive"), port_pair);
             }
         }
     }
@@ -90,12 +86,11 @@ void tcp_analyze(pcpp::Packet *Packet) {
                 TCP_PendingConnectionWatchList.remove(Packet_src);
             }
             if (Packet_src == interface_ipv4 || Packet_src == interface_ipv6) {
-                TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, false) , port_pair);
+                TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, "Dead") , port_pair);
             } else {
                 if(checkifOutgoing(Packet_src))
-                TCP_update_map(TCP_ConnectionMap_incoming, std::make_pair(Packet_src, false), port_pair);
+                TCP_update_map(TCP_ConnectionMap_incoming, std::make_pair(Packet_src, "Dead"), port_pair);
             }
-
     }
 
 }

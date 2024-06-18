@@ -4,13 +4,17 @@
 #include <string>
 #include <list>
 
-extern std::map<std::string ,bool> SSH_ConnectionMap;
+using namespace std;
+
+extern map<string ,string> SSH_ConnectionMap;
 extern int DROPPED_SSH;
-extern std::map<std::pair<std::string,bool> ,std::pair<int,int>> TCP_ConnectionMap_incoming;
-extern std::map<std::pair<std::string,bool> ,std::pair<int,int>> TCP_ConnectionMap_outgoing;
-extern std::map<std::string ,std::pair<int,int>> Untracked_TCP;
-extern std::string interface_ipv4;
-extern std::string interface_ipv6;
-extern std::list<std::string> TCP_PendingConnectionWatchList;
-extern std::multimap<int , std::string> SortedIPs;
+extern map<pair<string,string> ,pair<int,int>> TCP_ConnectionMap_incoming;
+extern map<pair<string,string> ,pair<int,int>> TCP_ConnectionMap_outgoing;
+extern map<string ,pair<int,int>> UDP_ConnectionMap_incoming;
+extern map<string,pair<int,int>> UDP_ConnectionMap_outgoing;
+extern map<string ,pair<int,int>> Untracked_TCP;
+extern string interface_ipv4;
+extern string interface_ipv6;
+extern list<string> TCP_PendingConnectionWatchList;
+extern multimap<int ,string> SortedIPs;
 #endif //NET_MON___DEFINES_H

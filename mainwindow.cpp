@@ -4,9 +4,6 @@
 #include "ui_mainwindow.h"
 #include "core/analyzer/utils/defines.h"
 
-
-
-
 MainWindow::MainWindow(QWidget *parent) :
         QWidget(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
@@ -16,7 +13,6 @@ MainWindow::MainWindow(QWidget *parent) :
     initDevList();
     getselectedDev();
     DevHandle.start_capture();
-
     //inti Alerts
     initService();
 
@@ -25,8 +21,9 @@ MainWindow::MainWindow(QWidget *parent) :
     auto nethogs = new Nethogs();
     nethogs->start();
 
-    // Create and initialize the chart
+    //set and initialize the status tab
     initStats();
+    // Create and initialize the chart
     ui->Spline->setChart(initChart());
     ui->Spline->setRenderHint(QPainter::Antialiasing);
     ui->Spline->setRenderHint(QPainter::SmoothPixmapTransform);

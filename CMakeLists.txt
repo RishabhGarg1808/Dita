@@ -16,6 +16,7 @@ set(CORE
         core/analyzer/utils/defines.h
         core/analyzer/utils/ip_utils.cpp
         core/analyzer/utils/map_util.cpp
+        core/analyzer/udp_analyzer.h
 )
 set(UI
         Graph/Graph.cpp
@@ -23,7 +24,7 @@ set(UI
         DevHandler.cpp
         DevHandler.h
         ui/line_graph.cpp
-        ui/alert_tab.cpp
+        ui/service_tab.cpp
         ui/stats_view.cpp
         ui/netutil_tab.cpp
         ui/netutil_tab.h
@@ -41,6 +42,7 @@ set (NETHOGS
         core/nethogs/src/process.cpp
         ui/line.cpp
         ui/line.h
+        core/analyzer/udp_analyzer.cpp
 
 )
 

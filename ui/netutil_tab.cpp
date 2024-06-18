@@ -366,7 +366,7 @@ void MainWindow::updateNetUtil(QVector<Line *> data, int n) {
         total_recv += (recv->text().split(unit)).first().toFloat();
     }
     QString proc= QString::fromStdString("\u2211 Processes : " + std::to_string(statsModel->rowCount()));
-    QString sent= QString::fromStdString("\u2211 Sent : " + QString::number(total_sent,'f',2).toStdString()  + " KBps");
-    QString recv= QString::fromStdString( "\u2211 Received : " + QString::number(total_recv,'f',2).toStdString() + " KBps");
+    QString sent= QString::fromStdString("\u2211 Sent : " + QString::number(total_sent,'f',2).toStdString()  + unit.toStdString());
+    QString recv= QString::fromStdString( "\u2211 Received : " + QString::number(total_recv,'f',2).toStdString() + unit.toStdString());
     totalModel->setHorizontalHeaderLabels(QStringList() << sent<< recv << proc);
 }
