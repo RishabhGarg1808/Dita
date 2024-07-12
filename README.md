@@ -4,9 +4,9 @@ network administrators and developers monitor and analyze network traffic
 in real-time. It provides detailed insights into network traffic, identifies potential
 traffics, and helps in monitoring network-related problems.
 
-### Caution : Don't rely on the current analyzer
+### Caution : Don't rely on the current Analyzer
 ### TO-DO:
-- [ ] Improve the traffic analyzer
+- [ ] Improve the traffic Analyzer
 - [ ] Improve the Services Tab
 - [ ] Make the graph relative to changes
 - [ ] Add dynamic unit selection in nethogs

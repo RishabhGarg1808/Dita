@@ -1,6 +1,5 @@
 #include "../mainwindow.h"
 #include "../ui_mainwindow.h"
-#include "../core/analyzer/utils/defines.h"
 
 #include <QString>
 #include <QTreeView>
@@ -58,7 +57,7 @@ void MainWindow::update_tcp(){
             };
 
     //incoming
-    for(auto& it: TCP_ConnectionMap_incoming){
+    for(auto& it: analyzer->TCP_ConnectionMap_incoming){
         QString parentStr = QString::fromStdString(it.first.first + " : " + it.first.second);
         QString childStr = QString::fromStdString("Port : " +
                 to_string(it.second.first) + " -> " + to_string(it.second.second));
@@ -83,7 +82,7 @@ void MainWindow::update_tcp(){
     }
 
     //outgoing
-    for(auto& it: TCP_ConnectionMap_outgoing){
+    for(auto& it: analyzer->TCP_ConnectionMap_outgoing){
         QString parentStr = QString::fromStdString(it.first.first + " : " + it.first.second);
         QString childStr = QString::fromStdString("Port : " +
                                                   to_string(it.second.first) + " -> " + to_string(it.second.second));
@@ -126,7 +125,7 @@ void MainWindow::update_udp() {
     };
 
     //Incoming
-    for(auto & it : UDP_ConnectionMap_incoming){
+    for(auto & it : analyzer->UDP_ConnectionMap_incoming){
         QString parentStr = QString::fromStdString(it.first);
         QString childStr =  QString::fromStdString( "Port : " + to_string(it.second.first) +
                 " -> " + to_string(it.second.second));
@@ -146,7 +145,7 @@ void MainWindow::update_udp() {
     }
 
     //Outgoing
-    for(auto & it : UDP_ConnectionMap_outgoing){
+    for(auto & it : analyzer->UDP_ConnectionMap_outgoing){
         QString parentStr = QString::fromStdString(it.first);
         QString childStr = QString::fromStdString( "Port : " + to_string(it.second.first) +
                           " -> " + to_string(it.second.second));
@@ -169,7 +168,7 @@ void MainWindow::update_udp() {
 }
 void MainWindow::update_ssh() {
     static QMap<QString, QStandardItem*> parentItems;
-    for(auto & it : SSH_ConnectionMap){
+    for(auto & it :  analyzer->SSH_ConnectionMap){
         string connection = it.first + " :: " + it.second;
         auto *child = new QStandardItem(QString::fromStdString(connection));
         auto parentKey = QString::fromStdString(it.first);

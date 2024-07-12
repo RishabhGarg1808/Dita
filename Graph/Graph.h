@@ -5,9 +5,11 @@
 #include <PcapLiveDevice.h>
 #include <iostream>
 #include <chrono>
-#include "../core/analyzer/protocol_analyzer.h"
+#include "../core/analyzer/Analyzer.h"
 
+using namespace std;
 class Graph{
+    Analyzer *analyzer;
     struct ServiceStats{
         long int tcpPacketCount = 0;
         long int udpPacketCount = 0;
@@ -16,16 +18,15 @@ class Graph{
         long int sslPacketCount = 0;
         long int sshPacketCount = 0;
         long int totalPacketCount = 0;
-        std::chrono::time_point<std::chrono::steady_clock> lastUpdate = std::chrono::steady_clock::now();
+        chrono::time_point<chrono::steady_clock> lastUpdate = chrono::steady_clock::now();
     };
-
 public:
-    static struct ServiceStats ServiceSt;
-    static void onPacketArrives(pcpp::RawPacket*,pcpp::PcapLiveDevice* ,void* );
-    static void consumePacket(pcpp::Packet&);
-    static void printtoConsole();
-    static struct ServiceStats getServiceStats();
-    static void reset();
+    Graph(Analyzer *);
+    struct ServiceStats ServiceSt;
+    void onPacketArrives(pcpp::RawPacket*,pcpp::PcapLiveDevice* ,void* );
+    void consumePacket(pcpp::Packet&);
+    struct ServiceStats getServiceStats() const;
+    void reset();
 };
 
 

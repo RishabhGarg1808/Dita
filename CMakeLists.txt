@@ -7,16 +7,17 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 set(CORE
-        core/analyzer/ip_analyzer.cpp
         core/analyzer/ssh_analyzer.cpp
         core/analyzer/tcp_analyzer.cpp
-        core/analyzer/protocol_analyzer.cpp
 
-        #utils
-        core/analyzer/utils/defines.h
+        #Utils
         core/analyzer/utils/ip_utils.cpp
         core/analyzer/utils/map_util.cpp
-        core/analyzer/udp_analyzer.h
+        core/analyzer/icmp_analyzer.cpp
+        core/analyzer/Analyzer.cpp
+        core/analyzer/Analyzer.h
+        core/analyzer/utils/Utils.cpp
+        core/analyzer/utils/Utils.h
 )
 set(UI
         Graph/Graph.cpp
@@ -28,6 +29,7 @@ set(UI
         ui/stats_view.cpp
         ui/netutil_tab.cpp
         ui/netutil_tab.h
+        ui/alerts.cpp
 )
 
 set (NETHOGS

@@ -51,16 +51,16 @@ QChart *MainWindow::initChart() {
 }
 
 void MainWindow::updateSeries() {
-    std::chrono::time_point<std::chrono::steady_clock> now = std::chrono::steady_clock::now();
+    chrono::time_point<chrono::steady_clock> now = chrono::steady_clock::now();
     // Insert data to graphs
-    auto tcp_y = Graph::ServiceSt.tcpPacketCount;
-    auto udp_y = Graph::ServiceSt.udpPacketCount;
-    auto http_y = Graph::ServiceSt.httpPacketCount;
-    auto icmp_y = Graph::ServiceSt.icmpPacketCount;
-    auto ssl_y = Graph::ServiceSt.sslPacketCount;
-    auto ssh_y = Graph::ServiceSt.sshPacketCount;
+    auto tcp_y = graph->ServiceSt.tcpPacketCount;
+    auto udp_y = graph->ServiceSt.udpPacketCount;
+    auto http_y = graph->ServiceSt.httpPacketCount;
+    auto icmp_y = graph->ServiceSt.icmpPacketCount;
+    auto ssl_y = graph->ServiceSt.sslPacketCount;
+    auto ssh_y = graph->ServiceSt.sshPacketCount;
 
-    auto total = Graph::ServiceSt.totalPacketCount;
+    auto total = graph->ServiceSt.totalPacketCount;
     auto x = QDateTime::currentDateTime().toMSecsSinceEpoch();
     if (total > 0) {
         TCP->append(x, (tcp_y * 100 / total));

@@ -2,7 +2,8 @@
 #include <QMessageBox>
 #include "DevHandler.h"
 
-DevHandler::DevHandler() {
+DevHandler::DevHandler(Graph *graph) {
+    this->graph = graph;
     int ret = pcap_findalldevs(&alldevsp,errbuf);
     if(ret>0){
         auto messagebox = new QMessageBox();
@@ -41,7 +42,9 @@ void DevHandler::start_capture() {
         messagebox->exec();
     }
 
-    dev->startCapture(Graph::onPacketArrives, &graph);
+    //bind the onPacketArrives function to a static block and pass it to the startCapture
+    function<void(pcpp::RawPacket*, pcpp::PcapLiveDevice*, void*)> binded = bind(&Graph::onPacketArrives,graph,placeholders::_1,placeholders::_2,placeholders::_3);
+    dev->startCapture(binded,&graph);
 }
 
 void DevHandler::select_dev(int dev_sel){
@@ -70,5 +73,9 @@ std::vector<std::string> DevHandler::get_dev_list() {
 
 pcpp::PcapLiveDevice *DevHandler::getDev() const {
     return dev;
+}
+
+DevHandler::DevHandler() {
+    //Do nothing
 }
 

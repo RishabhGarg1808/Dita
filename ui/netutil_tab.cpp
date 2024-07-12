@@ -35,7 +35,7 @@ void forceExit(bool success,const char* msg,...) {
 
 std::list<handle> handles;
 
-//utils function to dislapy error messages in ui
+//Utils function to dislapy error messages in ui
 void Nethogs::error_msg(const std::string &msg) {
     auto messagebox = new QErrorMessage();
     messagebox->setWindowTitle("Network Utilization Error");

@@ -1,10 +1,11 @@
 #include "Graph.h"
-struct Graph::ServiceStats Graph::ServiceSt = {0};
+
+
 void Graph::onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, void *cookie) {
     auto* stats = (ServiceStats*)cookie;
     pcpp::Packet parsedPacket(packet);
     consumePacket(parsedPacket);
-    packetSwitcher(&parsedPacket);
+    analyzer->packetSwitcher(&parsedPacket);
 }
 
 void Graph::consumePacket(pcpp::Packet &packet) {
@@ -23,17 +24,8 @@ void Graph::consumePacket(pcpp::Packet &packet) {
         ServiceSt.sshPacketCount++;
 }
 
-Graph::ServiceStats Graph::getServiceStats() {
-    return Graph::ServiceSt;
-}
-
-void Graph::printtoConsole() {
-    std::cout << "TCP Packets: " << ServiceSt.tcpPacketCount << std::endl;
-    std::cout << "UDP Packets: " << ServiceSt.udpPacketCount << std::endl;
-    std::cout << "HTTP Packets: " << ServiceSt.httpPacketCount << std::endl;
-    std::cout << "ICMP Packets: " << ServiceSt.icmpPacketCount << std::endl;
-    std::cout << "SSL Packets: " << ServiceSt.sslPacketCount << std::endl;
-    std::cout << "SSH Packets: " << ServiceSt.sshPacketCount << std::endl;
+Graph::ServiceStats Graph::getServiceStats() const {
+    return ServiceSt;
 }
 
 void Graph::reset() {
@@ -44,4 +36,9 @@ void Graph::reset() {
     ServiceSt.sslPacketCount = 0;
     ServiceSt.sshPacketCount = 0;
     ServiceSt.totalPacketCount = 0;
+}
+
+Graph::Graph(Analyzer *analyze) {
+    this->analyzer = analyze;
+    this->reset();
 }

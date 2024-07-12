@@ -12,11 +12,11 @@ class DevHandler {
     pcap_if_t *alldevsp,*temp;
     std::vector<std::string> dev_list;
     pcpp::PcapLiveDevice* dev;
-    Graph *graph = new Graph();
+    Graph *graph;
     int cntr=1;
 public:
-
     DevHandler();
+    DevHandler(Graph *);
     std::vector<std::string> get_dev_list();
     void select_dev(int);
     void start_capture();

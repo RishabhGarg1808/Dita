@@ -1,6 +1,9 @@
-#include "ip_utils.h"
+#include "Utils.h"
+#include "pcapplusplus/IPv4Layer.h"
+#include <pcapplusplus/IPv6Layer.h>
 
-string sourceIPExtractor(pcpp::Packet* Packet){
+
+string Utils::sourceIPExtractor(pcpp::Packet* Packet){
     pcpp::IPAddress ip;
     if(Packet->isPacketOfType(pcpp::IPv4)){
         auto* IPv4Layer = Packet->getLayerOfType<pcpp::IPv4Layer>();
@@ -8,13 +11,14 @@ string sourceIPExtractor(pcpp::Packet* Packet){
         return ip.toString();
     }
     if(Packet->isPacketOfType(pcpp::IPv6)){
-        auto* IPv6Layer = Packet->getLayerOfType<pcpp::IPv4Layer>();
+        auto* IPv6Layer = Packet->getLayerOfType<pcpp::IPv6Layer>();
         ip = IPv6Layer->getSrcIPAddress();
         return ip.toString();
     }
+    return "";
 }
 
-string destIPExtractor(pcpp::Packet* Packet){
+string Utils::destIPExtractor(pcpp::Packet* Packet){
     pcpp::IPAddress ip;
     if(Packet->isPacketOfType(pcpp::IPv4)){
         auto* IPv4Layer = Packet->getLayerOfType<pcpp::IPv4Layer>();
@@ -22,8 +26,10 @@ string destIPExtractor(pcpp::Packet* Packet){
         return ip.toString();
     }
     if(Packet->isPacketOfType(pcpp::IPv6)){
-        auto* IPv6Layer = Packet->getLayerOfType<pcpp::IPv4Layer>();
+        auto* IPv6Layer = Packet->getLayerOfType<pcpp::IPv6Layer>();
         ip = IPv6Layer->getDstIPAddress();
         return ip.toString();
     }
+
+    return "";
 }

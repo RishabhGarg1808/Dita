@@ -1,10 +1,7 @@
-#include "map_util.h"
+#include "Utils.h"
 
-map<string,string>::iterator SSH_it;
-map<pair<string,string> ,pair<int,int>>::iterator TCP_it;
-map<string ,pair<int,int>>::iterator UDP_it;
 
-void IP_update_map(map<string, int> &MAP,const string& ip){
+void Utils::IP_update_map(map<string, int> &MAP, const string& ip){
     auto it = MAP.find(ip);
     if(it != MAP.end()){
         MAP[ip]++;
@@ -16,7 +13,7 @@ void IP_update_map(map<string, int> &MAP,const string& ip){
     }
 }
 
-void SSH_update_map(map<string,string> &MAP,const string& ip,const string& val){
+void Utils::SSH_update_map(map<string,string> &MAP, const string& ip, const string& val){
     SSH_it = MAP.find(ip);
     if(SSH_it != MAP.end()){
         MAP[ip] = val;
@@ -28,8 +25,8 @@ void SSH_update_map(map<string,string> &MAP,const string& ip,const string& val){
     }
 }
 
-void TCP_update_map(map<pair<string,string> ,pair<int,int>>&MAP,const pair<string,string>& ip
-                    ,const pair<int ,int>& port){
+void Utils::TCP_update_map(map<pair<string,string> ,pair<int,int>>&MAP, const pair<string,string>& ip
+                    , const pair<int ,int>& port){
 
     TCP_it = MAP.find(ip);
     //CHeck if the value exists in the map if it does then update it else insert the values with key
@@ -43,8 +40,8 @@ void TCP_update_map(map<pair<string,string> ,pair<int,int>>&MAP,const pair<strin
     }
 }
 
-void UDP_update_map(map<string ,pair<int,int>>&MAP,
-                    const string& ip,const pair<int ,int>& port){
+void Utils::UDP_update_map(map<string ,pair<int,int>>&MAP,
+                           const string& ip, const pair<int ,int>& port){
 
     UDP_it = MAP.find(ip);
     //CHeck if the value exists in the map if it does then update it else insert the values with key
@@ -55,15 +52,5 @@ void UDP_update_map(map<string ,pair<int,int>>&MAP,
         IP_PORT.first = ip;
         IP_PORT.second = port;
         MAP.insert(IP_PORT);
-    }
-}
-
-bool is_existing(map<pair<string,string>, pair<int,int>>&MAP,const pair<string,string>& ip){
-
-    TCP_it = MAP.find(ip);
-    if(TCP_it != MAP.end()){
-        return true;
-    }else{
-        return false;
     }
 }

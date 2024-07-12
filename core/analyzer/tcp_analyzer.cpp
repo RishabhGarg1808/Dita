@@ -1,24 +1,9 @@
-#include "tcp_analyzer.h"
-#include "utils/defines.h"
-#include "utils/map_util.h"
-#include "utils/ip_utils.h"
+#include "Analyzer.h"
 #include <string>
 #include <list>
 #include <algorithm>
-
-
-map<pair<string,string> ,pair<int,int>> TCP_ConnectionMap_incoming;
-map<pair<string,string> ,pair<int,int>> TCP_ConnectionMap_outgoing;
-
-std::list<std::string> TCP_PendingConnectionWatchList;
-
-/* If a packet has SYN flag is set then we observe the packet for the connection
- * if the no ACK flag is set then the connection was dropped/terminated
- * if the RST/FIN flag is set then the connection was dropped/terminated
- * if the ACK flag is set then the connection was established
- * */
-
-bool check_list(const std::string& ip_packet){
+#include <TcpLayer.h>
+bool Analyzer::check_list(const std::string& ip_packet){
     if(TCP_PendingConnectionWatchList.empty()){
         return false;
     }else{
@@ -33,7 +18,7 @@ bool check_list(const std::string& ip_packet){
         }
     }
 }
-bool checkifOutgoing(const std::string& IP){
+bool Analyzer::checkifOutgoing(const std::string& IP){
 
     auto it = TCP_ConnectionMap_outgoing.find(std::make_pair(IP, "Alive"));
     auto it_another = TCP_ConnectionMap_outgoing.find(std::make_pair(IP,"Dead"));
@@ -46,17 +31,23 @@ bool checkifOutgoing(const std::string& IP){
 
 }
 
-void ssh_close(const std::string& src){
+void Analyzer::ssh_close(const std::string& src){
     auto it = SSH_ConnectionMap.find(src);
     if(it != SSH_ConnectionMap.end()) {
-        SSH_update_map(SSH_ConnectionMap, src, "Dead");
+        utils->SSH_update_map(SSH_ConnectionMap, src, "Dead");
     }
 }
 
-void tcp_analyze(pcpp::Packet *Packet) {
+/* If a packet has SYN flag is set then we observe the packet for the connection
+ * if the no ACK flag is set then the connection was dropped/terminated
+ * if the RST/FIN flag is set then the connection was dropped/terminated
+ * if the ACK flag is set then the connection was established
+ * */
+
+void Analyzer::tcp_analyze(pcpp::Packet *Packet) {
     auto *TcpLayer = Packet->getLayerOfType<pcpp::TcpLayer>();
-    auto Packet_src = sourceIPExtractor(Packet);
-    auto Packet_dest = destIPExtractor(Packet);
+    auto Packet_src = utils->sourceIPExtractor(Packet);
+    auto Packet_dest = utils->destIPExtractor(Packet);
     auto port_pair = std::make_pair(TcpLayer->getSrcPort(),TcpLayer->getDstPort());
 
     if (TcpLayer->getTcpHeader()->synFlag == 1 && TcpLayer->getTcpHeader()->ackFlag == 0) {
@@ -71,10 +62,10 @@ void tcp_analyze(pcpp::Packet *Packet) {
             TCP_PendingConnectionWatchList.remove(Packet_dest);
         }
         if (Packet_src == interface_ipv4 || Packet_src == interface_ipv6) {
-            TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, "Alive") ,port_pair);
+            utils->TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, "Alive") ,port_pair);
         } else {
             if(checkifOutgoing(Packet_dest)){
-            TCP_update_map(TCP_ConnectionMap_incoming,std::make_pair(Packet_src,"Alive"), port_pair);
+                utils->TCP_update_map(TCP_ConnectionMap_incoming,std::make_pair(Packet_src,"Alive"), port_pair);
             }
         }
     }
@@ -86,10 +77,10 @@ void tcp_analyze(pcpp::Packet *Packet) {
                 TCP_PendingConnectionWatchList.remove(Packet_src);
             }
             if (Packet_src == interface_ipv4 || Packet_src == interface_ipv6) {
-                TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, "Dead") , port_pair);
+                utils->TCP_update_map(TCP_ConnectionMap_outgoing, std::make_pair(Packet_dest, "Dead") , port_pair);
             } else {
                 if(checkifOutgoing(Packet_src))
-                TCP_update_map(TCP_ConnectionMap_incoming, std::make_pair(Packet_src, "Dead"), port_pair);
+                    utils->TCP_update_map(TCP_ConnectionMap_incoming, std::make_pair(Packet_src, "Dead"), port_pair);
             }
     }
 
