@@ -42,7 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->comboBox, SIGNAL(currentTextChanged(const QString &)),this, SLOT(reinit()));
     connect(nethogs,&Nethogs::updateNetUtilSignal,this,&MainWindow::updateNetUtil);
     connect(timer, &QTimer::timeout, this, &MainWindow::updateServiceStats);
-    //connect(ICMP,&ICMP_analyze::emit_icmp,this,&MainWindow::updateAlertsTab);
+    connect(analyzer,&Analyzer::emit_icmp,this,&MainWindow::updateAlertsTabPing);
+    connect(analyzer,&Analyzer::emit_ssh,this,&MainWindow::updateAlertsTabSSH);
 }
 
 MainWindow::~MainWindow() {

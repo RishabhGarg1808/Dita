@@ -5,7 +5,8 @@
 #include <PcapLiveDevice.h>
 #include <iostream>
 #include <chrono>
-#include "../core/analyzer/Analyzer.h"
+
+#include "core/analyzer/Analyzer.h"
 
 using namespace std;
 class Graph{
@@ -27,6 +28,7 @@ public:
     void consumePacket(pcpp::Packet&);
     struct ServiceStats getServiceStats() const;
     void reset();
+    static void smoothData(vector<long>&,int );
 };
 
 

@@ -1,6 +1,7 @@
 #include "netutil_tab.h"
-#include "cui.h"
-#include "../core/nethogs/src/nethogs.cpp"
+#include "core/nethogs/src/cui.h"
+#include "core/nethogs/src/nethogs.cpp"
+#include "../ui_mainwindow.h"
 
 /* DO NOT REMOVE quit_cb and forceExit functions
  * The following functions are used to handle the self-pipe trick.

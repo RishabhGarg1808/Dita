@@ -12,12 +12,13 @@ class Analyzer : public QObject {
     Q_OBJECT
 public:
     signals:
-        void emit_icmp();
+        void emit_icmp(const string&);
+        void emit_ssh(const string&,const string&);
 private:
     string interface_ipv4;
     string interface_ipv6;
     std::list<std::string> TCP_PendingConnectionWatchList;
-    const int THRESHOLD=1;
+    const int THRESHOLD=2;
     bool checkInMap(const string &val);
     map<string,int> ping_map;
     Utils *utils = new Utils;
@@ -29,6 +30,7 @@ public:
     map<string ,pair<int,int>> UDP_ConnectionMap_outgoing;
     map<string ,string> SSH_ConnectionMap;
 public:
+    string pingSrc;
     //main function which branches to other sub-functions
     void packetSwitcher(pcpp::Packet*);
 

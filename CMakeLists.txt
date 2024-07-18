@@ -16,7 +16,6 @@ set(CORE
         core/analyzer/icmp_analyzer.cpp
         core/analyzer/Analyzer.cpp
         core/analyzer/Analyzer.h
-        core/analyzer/utils/Utils.cpp
         core/analyzer/utils/Utils.h
 )
 set(UI
@@ -57,6 +56,7 @@ find_package(Qt6 COMPONENTS REQUIRED
 )
 find_package(PcapPlusPlus CONFIG REQUIRED)
 
+
 add_executable(Dita main.cpp ${CORE} ${UI} ${NETHOGS}
         mainwindow.cpp
         mainwindow.h
@@ -76,4 +76,4 @@ target_link_libraries(Dita
         ncurses
 )
 
-target_include_directories(Dita PRIVATE core/nethogs/src)
+target_include_directories(Dita PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

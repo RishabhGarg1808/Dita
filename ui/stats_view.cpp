@@ -1,9 +1,9 @@
 #include <QComboBox>
 #include <QTextBrowser>
+
+#include "mainwindow.h"
 #include "../ui_mainwindow.h"
-#include "../mainwindow.h"
-std::string interface_ipv4;
-std::string interface_ipv6;
+
 void *MainWindow::initStats(){
     //Tamper the below html builder at your own risk
     QString htmlTemplate = R"(
@@ -49,8 +49,6 @@ void *MainWindow::initStats(){
             QString::number(DevHandle->getDev()->getMtu())
             );
     ui->devStats->setHtml(htmlContent);
-    interface_ipv4 = DevHandle->getDev()->getIPv4Address().toString();
-    interface_ipv6 = DevHandle->getDev()->getIPv6Address().toString();
     return nullptr;
 }
 
@@ -69,8 +67,8 @@ void MainWindow::reinit() {
     DevHandle->stop_capture();
     DevHandle->select_dev(ui->comboBox->currentIndex()+1);
     DevHandle->start_capture();
-    interface_ipv4 = DevHandle->getDev()->getIPv4Address().toString();
-    interface_ipv6 = DevHandle->getDev()->getIPv6Address().toString();
+    analyzer->setInterfaceIpv4(DevHandle->getDev()->getIPv4Address().toString());
+    analyzer->setInterfaceIpv6(DevHandle->getDev()->getIPv6Address().toString());
     initStats();
 }
 

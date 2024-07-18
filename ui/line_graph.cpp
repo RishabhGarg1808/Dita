@@ -1,11 +1,9 @@
-#include <QtCharts/QChartView>
-#include <QtCharts/QLineSeries>
 #include <QtCharts/QSplineSeries>
 #include <QtCharts/QChart>
 #include <QtCharts/QDateTimeAxis>
 #include <QDateTime>
 
-#include "../mainwindow.h"
+#include "mainwindow.h"
 #include "../ui_mainwindow.h"
 
 QChart *MainWindow::initChart() {
@@ -53,6 +51,7 @@ QChart *MainWindow::initChart() {
 void MainWindow::updateSeries() {
     chrono::time_point<chrono::steady_clock> now = chrono::steady_clock::now();
     // Insert data to graphs
+
     auto tcp_y = graph->ServiceSt.tcpPacketCount;
     auto udp_y = graph->ServiceSt.udpPacketCount;
     auto http_y = graph->ServiceSt.httpPacketCount;
@@ -62,17 +61,26 @@ void MainWindow::updateSeries() {
 
     auto total = graph->ServiceSt.totalPacketCount;
     auto x = QDateTime::currentDateTime().toMSecsSinceEpoch();
+
+    vector<long> graphList = {tcp_y,udp_y,http_y,icmp_y,ssl_y,ssh_y};
+    //Graph::smoothData(graphList,3);
     if (total > 0) {
-        TCP->append(x, (tcp_y * 100 / total));
-        UDP->append(x, (udp_y * 100 / total));
-        HTTP->append(x, (http_y * 100 / total));
-        ICMP->append(x, (icmp_y * 100 / total));
-        SSL->append(x, (ssl_y * 100 / total));
-        SSH->append(x, (ssh_y * 100 / total));
+        TCP->append(x, (graphList.at(0) * 100/total ));
+        UDP->append(x, (graphList.at(1) * 100/total ));
+        HTTP->append(x, (graphList.at(2) * 100/total ));
+        ICMP->append(x, (graphList.at(3) * 100/total ));
+        SSL->append(x, (graphList.at(4) * 100/total ));
+        SSH->append(x, (graphList.at(5) * 100/total ));
     }
 
     // adjusting the axis range to keep the latest data visible
     ui->Spline->chart()->axisX()->setRange(QDateTime::currentDateTime().addSecs(-600),
                                            QDateTime::currentDateTime()); // Show last 10 units on X-axis
-    ui->Spline->chart()->axisY()->setRange(0, 100); // Adjust Y-axis as needed
+    ui->Spline->chart()->axisY()->setRange(0,100);// Adjust Y-axis as needed
+
+    //Reset the graph data every 3 seconds to aggregate the data evenly;
+//    if(gphUtil%2==0){
+//        graph->reset();
+//    }
+//    gphUtil++;
 }

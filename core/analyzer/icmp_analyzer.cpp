@@ -2,9 +2,11 @@
 #include "Analyzer.h"
 
 void Analyzer::icmp_analyze(pcpp::Packet *Packet) {
+
     if(Packet->isPacketOfType(pcpp::ICMP )
        || Packet->isPacketOfType(pcpp::ICMPv6) ){
         string srcIP = utils->sourceIPExtractor(Packet);
+
         //Make sure that only Incoming packets are analyzed
         if(srcIP != interface_ipv4 && srcIP != interface_ipv6){
             if(checkInMap(utils->sourceIPExtractor(Packet))){
@@ -17,12 +19,10 @@ void Analyzer::icmp_analyze(pcpp::Packet *Packet) {
 }
 
 bool Analyzer::checkInMap(const string& val) {
-    string pingSrc;
     auto it = ping_map.find(val);
     if(it != ping_map.end()){
         if(ping_map[val] >= THRESHOLD){
-            pingSrc = val;
-            emit emit_icmp();
+            emit emit_icmp(val);
         }
         return true;
     }

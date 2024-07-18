@@ -3,6 +3,7 @@
 #include <list>
 #include <algorithm>
 #include <TcpLayer.h>
+
 bool Analyzer::check_list(const std::string& ip_packet){
     if(TCP_PendingConnectionWatchList.empty()){
         return false;
@@ -35,6 +36,7 @@ void Analyzer::ssh_close(const std::string& src){
     auto it = SSH_ConnectionMap.find(src);
     if(it != SSH_ConnectionMap.end()) {
         utils->SSH_update_map(SSH_ConnectionMap, src, "Dead");
+        emit_ssh(src,"Disconnected");
     }
 }
 

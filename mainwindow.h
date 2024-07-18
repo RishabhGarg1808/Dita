@@ -25,9 +25,11 @@ private slots:
     void reinit();
     void updateNetUtil(QVector<Line*>, int);
     void updateServiceStats();
-    void updateAlertsTab();
+    void updateAlertsTabPing(const string&);
+    void updateAlertsTabSSH(const string&,const string&);
 
 private:
+    int gphUtil =0;
     Analyzer *analyzer;
     Graph *graph;
     QString unit = " KBps";
@@ -36,7 +38,7 @@ private:
     QTimer *timer,*timer2;
     DevHandler *DevHandle;
     QDateTime time = QDateTime::currentDateTime();
-    QStandardItemModel *totalModel,*statsModel,*serviceModel;
+    QStandardItemModel *totalModel,*statsModel,*serviceModel,*alertsModel;
     QStandardItem *ssh,*tcp,*udp;
     QStandardItem *UdpIncoming,*UdpOutgoing,*TcpIncoming,*TcpOutgoing;
 private:

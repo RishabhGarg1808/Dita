@@ -1,12 +1,11 @@
 #ifndef DITA_NETUTIL_TAB_H
 #define DITA_NETUTIL_TAB_H
 
-#include "../ui_mainwindow.h"
-#include "../mainwindow.h"
+#include "mainwindow.h"
 
-#include "../core/nethogs/src/process.h"
-#include "../core/nethogs/src/devices.h"
-#include "../core/nethogs/src/decpcap.h"
+#include "core/nethogs/src/process.h"
+#include "core/nethogs/src/devices.h"
+#include "core/nethogs/src/decpcap.h"
 #include "line.h"
 #include <QVector>
 #include <QErrorMessage>

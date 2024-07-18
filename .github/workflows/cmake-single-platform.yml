@@ -21,10 +21,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Update local Repos
-      run: apt-get update && apt-get install git 
-      
+
     - name: Clone Vcpkg
       run: git clone https://github.com/microsoft/vcpkg.git
       
