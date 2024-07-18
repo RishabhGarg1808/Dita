@@ -26,10 +26,10 @@ jobs:
       run: git clone https://github.com/microsoft/vcpkg.git
       
     - name: Install Vcpkg
-      run: cd vcpkg && bootstrap-vcpkg.sh
+      run: cd vcpkg && ./bootstrap-vcpkg.sh
 
     - name: Install Packages
-      run: vcpkg install qt libpcap pcaplusplus ncurses
+      run: vcpkg install qt libpcap pcapplusplus ncurses
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
