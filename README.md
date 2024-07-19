@@ -4,8 +4,14 @@ network administrators and developers monitor and analyze network traffic
 in real-time. It provides detailed insights into network traffic, identifies potential
 traffics, and helps in monitoring network-related problems.
 
-### TO-DO:
-- [ ] Make the graph relative to changes
+## Overview 
+![plot](./screenshot/main.png)
+
+### - Activity graph 
+![plot](./screenshot/graph.png)
+
+### - Services Info
+![plot](./screenshot/info.png)
 
 ## Build Instructions:
 - Requirements: \
@@ -14,9 +20,15 @@ traffics, and helps in monitoring network-related problems.
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PcapPlusPlus \
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; libpcap 
 - Build: 
-  
+```
+$ vcpkg install qt libpcap pcapplusplus ncurses
+```
+```
+$ cmake -S . -B build
+```
 - Run: 
 ```
+cd build
 sudo ./dita
 ```
 

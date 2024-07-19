@@ -44,9 +44,7 @@ set (NETHOGS
         ui/line.cpp
         ui/line.h
         core/analyzer/udp_analyzer.cpp
-
 )
-
 find_package(Qt6 COMPONENTS REQUIRED
         Core
         Gui
@@ -55,8 +53,6 @@ find_package(Qt6 COMPONENTS REQUIRED
         Charts
 )
 find_package(PcapPlusPlus CONFIG REQUIRED)
-
-
 add_executable(Dita main.cpp ${CORE} ${UI} ${NETHOGS}
         mainwindow.cpp
         mainwindow.h
@@ -75,5 +71,4 @@ target_link_libraries(Dita
         PcapPlusPlus::Packet++
         ncurses
 )
-
 target_include_directories(Dita PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
