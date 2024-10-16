@@ -358,16 +358,44 @@ void MainWindow::updateNetUtil(QVector<Line *> data, int n) {
         }
     }
     float total_sent =0;
-    float total_recv =0;
+    float totalReceive=0;
+    float sendSpeed = 0;
+    float receiveSpeed = 0;
 
     for(int i = 0; i < statsModel->rowCount(); i++){
-        QStandardItem *sent = statsModel->item(i, 4);
-        QStandardItem *recv = statsModel->item(i, 5);
+        QStandardItem* sent = statsModel->item(i, 4);
+        QStandardItem* recv = statsModel->item(i, 5);
         total_sent += (sent->text().split(unit)).first().toFloat();
-        total_recv += (recv->text().split(unit)).first().toFloat();
+        totalReceive += (recv->text().split(unit)).first().toFloat();
     }
+
+    auto adjustCols = [&](int coeff){
+        for(int i =0;i<statsModel->rowCount();i++){
+            QStandardItem *sent = statsModel->item(i, 4);
+            QStandardItem *recv = statsModel->item(i, 5);
+            sent->setText(QString::number(sent->text().toFloat()/coeff,'f',2) );
+            recv->setText(QString::number(recv->text().toFloat()/coeff,'f',2) );
+        }
+    };
+
+    if(total_sent > 2048 || totalReceive > 2048){
+        unit = " MBps";
+        adjustCols(1024);
+        sendSpeed = total_sent/1024;
+        receiveSpeed = totalReceive/1024;
+    }else if(total_sent > (2*1024*1024) || totalReceive > (2*1024*1024)){
+        unit = " GBps";
+        adjustCols(1024*1024);
+        sendSpeed = total_sent/(1024*1024);
+        receiveSpeed = totalReceive/(1024*1024);
+    }else if(total_sent < 2048 || totalReceive < 2048){
+        unit = " KBps";
+        sendSpeed = total_sent;
+        receiveSpeed = totalReceive;
+    }
+
     QString proc= QString::fromStdString("\u2211 Processes : " + std::to_string(statsModel->rowCount()));
-    QString sent= QString::fromStdString("\u2211 Sent : " + QString::number(total_sent,'f',2).toStdString()  + unit.toStdString());
-    QString recv= QString::fromStdString( "\u2211 Received : " + QString::number(total_recv,'f',2).toStdString() + unit.toStdString());
-    totalModel->setHorizontalHeaderLabels(QStringList() << sent<< recv << proc);
+    QString sentInfo= QString::fromStdString("\u2211 Sent : " + QString::number(sendSpeed,'f',2).toStdString()  + unit.toStdString());
+    QString recvInfo= QString::fromStdString( "\u2211 Received : " + QString::number(receiveSpeed,'f',2).toStdString() + unit.toStdString());
+    totalModel->setHorizontalHeaderLabels(QStringList() << sentInfo << recvInfo << proc);
 }

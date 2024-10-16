@@ -58,7 +58,6 @@ void Graph::smoothData(vector<long>& data, int windowSize) {
             sum += data[j];
             ++count;
         }
-
         smoothedData[i] = sum / count;
     }
 
