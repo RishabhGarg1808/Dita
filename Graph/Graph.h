@@ -11,6 +11,7 @@
 using namespace std;
 class Graph{
     Analyzer *analyzer;
+public:
     struct ServiceStats{
         long int tcpPacketCount = 0;
         long int udpPacketCount = 0;
@@ -21,14 +22,12 @@ class Graph{
         long int totalPacketCount = 0;
         chrono::time_point<chrono::steady_clock> lastUpdate = chrono::steady_clock::now();
     };
-public:
     Graph(Analyzer *);
     struct ServiceStats ServiceSt;
     void onPacketArrives(pcpp::RawPacket*,pcpp::PcapLiveDevice* ,void* );
     void consumePacket(pcpp::Packet&);
     struct ServiceStats getServiceStats() const;
     void reset();
-    static void smoothData(vector<long>&,int );
 };
 
 

@@ -342,8 +342,8 @@ void MainWindow::updateNetUtil(QVector<Line *> data, int n) {
             statsModel->item(i, 1)->setText(QString::fromStdString(std::to_string(line->m_uid)));
             statsModel->item(i, 2)->setText(QString::fromStdString(line->m_name));
             statsModel->item(i, 3)->setText(QString::fromStdString(line->devicename));
-            statsModel->item(i, 4)->setText(QString::number(line->sent_value,'f',2));
-            statsModel->item(i, 5)->setText(QString::number(line->recv_value,'f',2));
+            statsModel->item(i, 4)->setText(QString::number(line->sent_value,'f',2)+ unit);
+            statsModel->item(i, 5)->setText(QString::number(line->recv_value,'f',2)+ unit);
         } else {
             // Add new row if it doesn't exist and check for pid != 0
             if(line->m_pid == 0) continue;
@@ -373,8 +373,8 @@ void MainWindow::updateNetUtil(QVector<Line *> data, int n) {
         for(int i =0;i<statsModel->rowCount();i++){
             QStandardItem *sent = statsModel->item(i, 4);
             QStandardItem *recv = statsModel->item(i, 5);
-            sent->setText(QString::number(sent->text().toFloat()/coeff,'f',2) );
-            recv->setText(QString::number(recv->text().toFloat()/coeff,'f',2) );
+            sent->setText(QString::number(sent->text().toFloat()/coeff,'f',2) + unit);
+            recv->setText(QString::number(recv->text().toFloat()/coeff,'f',2) + unit);
         }
     };
 

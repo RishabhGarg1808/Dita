@@ -11,6 +11,7 @@
 #include "DevHandler.h"
 #include "ui/netutil_tab.h"
 #include "ui/line.h"
+#include <cxxabi.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -52,9 +53,15 @@ private:
 //functions  for the service tab
     void update_tcp();
     void update_udp();
-//    void update_http();
-//    void update_icmp();
     void update_ssh();
+
+    //utility function to check the type specified by auto
+    std::string demangled(std::string const& sym) {
+        std::unique_ptr<char, void(*)(void*)>
+                name{abi::__cxa_demangle(sym.c_str(), nullptr, nullptr, nullptr), std::free};
+        return {name.get()};
+    }
+public:
 };
 
 

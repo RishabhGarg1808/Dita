@@ -49,21 +49,31 @@ QChart *MainWindow::initChart() {
 }
 
 void MainWindow::updateSeries() {
+    static vector<long> prevList;
     chrono::time_point<chrono::steady_clock> now = chrono::steady_clock::now();
     // Insert data to graphs
-
     auto tcp_y = graph->ServiceSt.tcpPacketCount;
     auto udp_y = graph->ServiceSt.udpPacketCount;
     auto http_y = graph->ServiceSt.httpPacketCount;
     auto icmp_y = graph->ServiceSt.icmpPacketCount;
     auto ssl_y = graph->ServiceSt.sslPacketCount;
     auto ssh_y = graph->ServiceSt.sshPacketCount;
-
     auto total = graph->ServiceSt.totalPacketCount;
+
     auto x = QDateTime::currentDateTime().toMSecsSinceEpoch();
 
     vector<long> graphList = {tcp_y,udp_y,http_y,icmp_y,ssl_y,ssh_y};
-    //Graph::smoothData(graphList,3);
+    //drop if the data stats if the data comming from the network is zero for a protocol
+    auto checkZero = [](vector<long>& currentList,vector<long>& prevList) {
+        for (size_t i = 0; i < currentList.size(); ++i) {
+            if (currentList[i] == 0 && prevList[i] != 0) {
+                currentList[i] = 0;
+            }
+        }
+    };
+    checkZero(graphList, prevList);
+    prevList = graphList;
+
     if (total > 0) {
         TCP->append(x, (graphList.at(0) * 100/total ));
         UDP->append(x, (graphList.at(1) * 100/total ));
@@ -78,9 +88,4 @@ void MainWindow::updateSeries() {
                                            QDateTime::currentDateTime()); // Show last 10 units on X-axis
     ui->Spline->chart()->axisY()->setRange(0,100);// Adjust Y-axis as needed
 
-    //Reset the graph data every 3 seconds to aggregate the data evenly;
-//    if(gphUtil%2==0){
-//        graph->reset();
-//    }
-//    gphUtil++;
 }
