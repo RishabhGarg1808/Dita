@@ -1,6 +1,5 @@
 #include "Graph.h"
 
-
 void Graph::onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, void *cookie) {
     auto* stats = (ServiceStats*)cookie;
     pcpp::Packet parsedPacket(packet);

@@ -48,8 +48,20 @@ QChart *MainWindow::initChart() {
     return chart;
 }
 
+vector<long> MainWindow::calculateSMA(const vector<long> &graphList, int windowSize) {
+    vector<long> smaValues(graphList.size(), 0.0);
+    for (size_t i = 0; i < graphList.size(); ++i) {
+        int start = std::max(0, static_cast<int>(i) - windowSize + 1);
+        int end = i + 1;
+        long sum = 0.0;
+        for (int j = start; j < end; ++j) {
+            sum += graphList[j];
+        }
+        smaValues[i] = sum / (end - start);
+    }
+    return smaValues;
+}
 void MainWindow::updateSeries() {
-    static vector<long> prevList;
     chrono::time_point<chrono::steady_clock> now = chrono::steady_clock::now();
     // Insert data to graphs
     auto tcp_y = graph->ServiceSt.tcpPacketCount;
@@ -63,16 +75,7 @@ void MainWindow::updateSeries() {
     auto x = QDateTime::currentDateTime().toMSecsSinceEpoch();
 
     vector<long> graphList = {tcp_y,udp_y,http_y,icmp_y,ssl_y,ssh_y};
-    //drop if the data stats if the data comming from the network is zero for a protocol
-    auto checkZero = [](vector<long>& currentList,vector<long>& prevList) {
-        for (size_t i = 0; i < currentList.size(); ++i) {
-            if (currentList[i] == 0 && prevList[i] != 0) {
-                currentList[i] = 0;
-            }
-        }
-    };
-    checkZero(graphList, prevList);
-    prevList = graphList;
+    graphList = calculateSMA(graphList, 2);
 
     if (total > 0) {
         TCP->append(x, (graphList.at(0) * 100/total ));
