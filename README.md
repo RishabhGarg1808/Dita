@@ -1,4 +1,4 @@
-# Dita (Beta)
+# Dita
 Dita is an open-source,lightweight network monitoring and analysis tool designed to help
 network administrators and developers monitor and analyze network traffic
 in real-time. It provides detailed insights into network traffic, identifies potential
