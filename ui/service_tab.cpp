@@ -5,7 +5,7 @@
 #include <QTreeView>
 #include <QStandardItemModel>
 
-void *MainWindow::initService(){
+void MainWindow::initService(){
         serviceModel = new QStandardItemModel();
         ssh = new QStandardItem("SSH");
         tcp = new QStandardItem("TCP");
@@ -35,152 +35,84 @@ void *MainWindow::initService(){
         // Set the model on the tree view
         ui->servTree->setModel(serviceModel);
 
-    return nullptr;
 }
 
+
 void MainWindow::update_tcp(){
-    static QMap<QString,QStandardItem*> parentItemsIncoming;
-    static QMap<QString,QStandardItem*> parentItemsOutgoing;
+    // NOTE: rows are rebuilt from scratch every tick (see updateServiceStats),
+    // so items must never be cached across ticks - that would be a
+    // use-after-free once the previous tick's rows were removed.
 
-    //lambda expression to check whether the child is present in the parent or not
-    auto checkPresent =
-            [&] ( QStandardItem* item ,const QString& value){
-                for(int i =0 ;i<item->rowCount();++i){
-                    if(item->child(i) == nullptr){
-                        break;
-                    }
-                    if(item->child(i)->text() == value){
-                        return true;
-                    }
-                }
-                return false;
-            };
-
-    //incoming
-    for(auto& it: analyzer->TCP_ConnectionMap_incoming){
+    //incoming - use thread-safe copy
+    auto tcp_incoming = analyzer->getTcpIncomingCopy();
+    for(auto& it: tcp_incoming){
         QString parentStr = QString::fromStdString(it.first.first + " : " + it.first.second);
         QString childStr = QString::fromStdString("Port : " +
                 to_string(it.second.first) + " -> " + to_string(it.second.second));
 
         auto *parent = new QStandardItem(parentStr);
-        auto *child = new QStandardItem(childStr);
-
-        auto parentKey = QString::fromStdString(it.first.first);
-        if(parentItemsIncoming.contains(parentKey)){
-            if(parentItemsIncoming[parentKey]->text() != parentStr){
-                parentItemsIncoming[parentKey]->setText(parentStr);
-            }
-            if(!checkPresent(parentItemsIncoming[parentKey], childStr)){
-                parentItemsIncoming[parentKey]->appendRow(child);
-            }
-        }else{
-            parent->appendRow(child);
-            TcpIncoming->appendRow(parent);
-            parentItemsIncoming[parentKey] = parent;
-        }
-
+        TcpIncoming->appendRow(parent);
+        parent->appendRow(new QStandardItem(childStr));
     }
 
-    //outgoing
-    for(auto& it: analyzer->TCP_ConnectionMap_outgoing){
+    //outgoing - use thread-safe copy
+    auto tcp_outgoing = analyzer->getTcpOutgoingCopy();
+    for(auto& it: tcp_outgoing){
         QString parentStr = QString::fromStdString(it.first.first + " : " + it.first.second);
         QString childStr = QString::fromStdString("Port : " +
                                                   to_string(it.second.first) + " -> " + to_string(it.second.second));
 
         auto *parent = new QStandardItem(parentStr);
-        auto *child = new QStandardItem(childStr);
-        auto parentKey = QString::fromStdString(it.first.first);
-        if(parentItemsOutgoing.contains(parentKey)){
-            if(parentItemsOutgoing[parentKey]->text() != parentStr){
-                parentItemsOutgoing[parentKey]->setText(parentStr);
-            }
-            if(!checkPresent(parentItemsOutgoing[parentKey], childStr)){
-                parentItemsOutgoing[parentKey]->appendRow(child);
-            }
-        }else{
-            parent->appendRow(child);
-            TcpOutgoing->appendRow(parent);
-            parentItemsOutgoing[parentKey] = parent;
-        }
-
+        TcpOutgoing->appendRow(parent);
+        parent->appendRow(new QStandardItem(childStr));
     }
 }
 
 void MainWindow::update_udp() {
-    static QMap<QString,QStandardItem*> parentItemsIncoming;
-    static QMap<QString,QStandardItem*> parentItemsOutgoing;
+    // Rows are rebuilt from scratch every tick; never cache items across ticks.
 
-    //lambda expression to check whether the child is present in the parent or not
-    auto checkPresent =
-            [&] ( QStandardItem* item ,const QString& value){
-        for(int i =0 ;i<item->rowCount();++i){
-            if(item->child(i) == NULL){
-                break;
-            }
-            if(item->child(i)->text() == value){
-                return true;
-            }
-        }
-        return false;
-    };
-
-    //Incoming
-    for(auto & it : analyzer->UDP_ConnectionMap_incoming){
+    //Incoming - use thread-safe copy
+    auto udp_incoming = analyzer->getUdpIncomingCopy();
+    for(auto & it : udp_incoming){
         QString parentStr = QString::fromStdString(it.first);
         QString childStr =  QString::fromStdString( "Port : " + to_string(it.second.first) +
                 " -> " + to_string(it.second.second));
 
         auto *parent = new QStandardItem(parentStr);
-        auto *child = new QStandardItem(childStr);
-
-        if(parentItemsIncoming.contains(parentStr)){
-           if(!checkPresent(parentItemsIncoming[parentStr], childStr)){
-            parentItemsIncoming[parentStr]->appendRow(child);
-           }
-        }else{
-            parent->appendRow(child);
-            UdpIncoming->appendRow(parent);
-            parentItemsIncoming[parentStr] = parent;
-        }
+        UdpIncoming->appendRow(parent);
+        parent->appendRow(new QStandardItem(childStr));
     }
 
-    //Outgoing
-    for(auto & it : analyzer->UDP_ConnectionMap_outgoing){
+    //Outgoing - use thread-safe copy
+    auto udp_outgoing = analyzer->getUdpOutgoingCopy();
+    for(auto & it : udp_outgoing){
         QString parentStr = QString::fromStdString(it.first);
         QString childStr = QString::fromStdString( "Port : " + to_string(it.second.first) +
-                          " -> " + to_string(it.second.second));
+                " -> " + to_string(it.second.second));
 
         auto *parent = new QStandardItem(parentStr);
-        auto *child = new QStandardItem(childStr);
-
-        if(parentItemsOutgoing.contains(parentStr)){
-            if(!checkPresent(parentItemsOutgoing[parentStr], childStr)){
-                parentItemsOutgoing[parentStr]->appendRow(child);
-            }
-        }else{
-            parent->appendRow(child);
-            UdpOutgoing->appendRow(parent);
-            parentItemsOutgoing[parentStr] = parent;
-        }
+        UdpOutgoing->appendRow(parent);
+        parent->appendRow(new QStandardItem(childStr));
     }
-
-
 }
+
 void MainWindow::update_ssh() {
-    static QMap<QString, QStandardItem*> parentItems;
-    for(auto & it :  analyzer->SSH_ConnectionMap){
+    // Rows are rebuilt from scratch every tick; never cache items across ticks.
+    auto ssh_map = analyzer->getSshCopy();
+    for(auto & it : ssh_map){
         string connection = it.first + " :: " + it.second;
         auto *child = new QStandardItem(QString::fromStdString(connection));
-        auto parentKey = QString::fromStdString(it.first);
-        if(parentItems.contains(parentKey)) {
-            parentItems[parentKey]->setText(QString::fromStdString(connection));
-        }else{
-            parentItems[parentKey] = child;
-            ssh->appendRow(child);
-        }
+        ssh->appendRow(child);
     }
 }
 void MainWindow::updateServiceStats(){
+    // Clear tree before updating to remove stale entries (B3)
+    TcpIncoming->removeRows(0, TcpIncoming->rowCount());
+    TcpOutgoing->removeRows(0, TcpOutgoing->rowCount());
+    UdpIncoming->removeRows(0, UdpIncoming->rowCount());
+    UdpOutgoing->removeRows(0, UdpOutgoing->rowCount());
+    ssh->removeRows(0, ssh->rowCount());
+
     update_tcp();
     update_udp();
     update_ssh();

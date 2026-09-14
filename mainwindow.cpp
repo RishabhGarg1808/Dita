@@ -17,17 +17,19 @@ MainWindow::MainWindow(QWidget *parent) :
     initDevList();
     getselectedDev();
 
+    // Tell the analyzer which IP is ours *before* the capture thread starts,
+    // so it never classifies packets against an unset interface address.
+    analyzer->setInterfaceIpv4(DevHandle->getDev()->getIPv4Address().toString());
+    analyzer->setInterfaceIpv6(DevHandle->getDev()->getIPv6Address().toString());
+
     DevHandle->start_capture();
     //inti Alerts
     initService();
 
     //set up nethogs for use
     initNetUtil();
-    auto nethogs = new Nethogs();
+    nethogs = new Nethogs();
     nethogs->start();
-
-    analyzer->setInterfaceIpv4(DevHandle->getDev()->getIPv4Address().toString());
-    analyzer->setInterfaceIpv6(DevHandle->getDev()->getIPv6Address().toString());
     //set and initialize the status tab
     initStats();
     // Create and initialize the chart
@@ -42,13 +44,25 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->comboBox, SIGNAL(currentTextChanged(const QString &)),this, SLOT(reinit()));
     connect(nethogs,&Nethogs::updateNetUtilSignal,this,&MainWindow::updateNetUtil);
     connect(timer, &QTimer::timeout, this, &MainWindow::updateServiceStats);
+    connect(timer, &QTimer::timeout, this, &MainWindow::cleanupDeadConnections);
     connect(analyzer,&Analyzer::emit_icmp,this,&MainWindow::updateAlertsTabPing);
     connect(analyzer,&Analyzer::emit_ssh,this,&MainWindow::updateAlertsTabSSH);
 }
 
+void MainWindow::cleanupDeadConnections() {
+    analyzer->cleanupDeadConnections();
+}
+
 MainWindow::~MainWindow() {
     DevHandle->stop_capture();
-    quit_cb(0);
+    timer->stop();
+    if (timer2) {
+        timer2->stop();
+    }
+    if (nethogs) {
+        nethogs->stop();
+        delete nethogs;
+    }
     delete ui;
 }
 

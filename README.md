@@ -26,11 +26,31 @@ $ vcpkg install qt libpcap pcapplusplus ncurses
 ```
 $ cmake -S . -B build
 ```
-- Run: 
+- Run (as root): 
 ```
 cd build
-sudo ./dita
+sudo ./Dita
 ```
+
+## Running without root
+Dita does not require root. Packet capture only needs `CAP_NET_RAW`
+(promiscuous mode additionally needs `CAP_NET_ADMIN`, and mapping network
+sockets to processes needs `CAP_DAC_READ_SEARCH` + `CAP_SYS_PTRACE`).
+Grant the binary those capabilities once, then run it normally:
+```
+sudo setcap cap_net_raw,cap_net_admin,cap_dac_read_search,cap_sys_ptrace+ep build/Dita
+./build/Dita
+```
+Note: file capabilities are lost if the binary is copied or moved -
+re-run `setcap` afterwards. Alternative (capture only, no per-process
+table for other users, re-login required):
+```
+sudo usermod -aG pcap $USER
+```
+If no capture permission is detected at startup, Dita shows a dialog
+explaining the options. Without `CAP_NET_ADMIN` it falls back to
+non-promiscuous capture; without `CAP_DAC_READ_SEARCH` +
+`CAP_SYS_PTRACE` the per-process table only lists your own processes.
 
 #### References:
 [PcapPlusplus](https://pcapplusplus.github.io/) \

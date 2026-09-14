@@ -4,42 +4,65 @@
 
 DevHandler::DevHandler(Graph *graph) {
     this->graph = graph;
+    this->dev = nullptr;
     int ret = pcap_findalldevs(&alldevsp,errbuf);
     if(ret>0){
-        auto messagebox = new QMessageBox();
-        messagebox->setWindowTitle("Error!");
-        messagebox->setInformativeText("Error Finding Device");
-        messagebox->exec();
+        QMessageBox messagebox(nullptr);
+        messagebox.setWindowTitle("Error!");
+        messagebox.setInformativeText("Error Finding Device");
+        messagebox.exec();
         exit(1);
     }else{
         for(temp = alldevsp;temp;temp=temp->next){
             dev_list.push_back(temp->name);
             cntr++;
         }
+        // M1: Free the device list allocated by pcap_findalldevs
+        pcap_freealldevs(alldevsp);
+        alldevsp = nullptr;
+    }
+}
+
+DevHandler::~DevHandler() {
+    // M1: Free device list if not already freed
+    if (alldevsp != nullptr) {
+        pcap_freealldevs(alldevsp);
+        alldevsp = nullptr;
     }
 }
 
 void DevHandler::stop_capture() {
-    dev->stopCapture();
-    std::cout << "Capture stopped" <<std::endl;
+    if (dev && dev->isOpened()) {
+        dev->stopCapture();
+        std::cout << "Capture stopped" <<std::endl;
+    }
 }
 
 void DevHandler::start_capture() {
-    dev = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDeviceByName(dev_name);
+    if (dev == NULL) {
+        dev = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDeviceByName(dev_name);
+    }
     if (dev == NULL)
     {
-        auto messagebox = new QMessageBox();
-        messagebox->setWindowTitle("Error!");
-        messagebox->setInformativeText("Can not find interface");
-        messagebox->exec();
+        QMessageBox messagebox(nullptr);
+        messagebox.setWindowTitle("Error!");
+        messagebox.setInformativeText("Can not find interface");
+        messagebox.exec();
         return;
 
     }
     if (!dev->open()) {
-        auto messagebox = new QMessageBox();
-        messagebox->setWindowTitle("Error!");
-        messagebox->setInformativeText("Can not open device");
-        messagebox->exec();
+        // Promiscuous mode (the default) needs CAP_NET_ADMIN/root. If the
+        // process only has CAP_NET_RAW (e.g. 'pcap' group membership), retry
+        // in non-promiscuous mode.
+        pcpp::PcapLiveDevice::DeviceConfiguration cfg(pcpp::PcapLiveDevice::Normal);
+        if (!dev->open(cfg)) {
+            QMessageBox messagebox(nullptr);
+            messagebox.setWindowTitle("Error!");
+            messagebox.setInformativeText("Can not open device "
+                "(insufficient privileges for packet capture?)");
+            messagebox.exec();
+        }
     }
 
     //bind the onPacketArrives function to a static block and pass it to the startCapture
@@ -52,15 +75,11 @@ void DevHandler::select_dev(int dev_sel){
         std::cerr << "Device list is empty." << std::endl;
         exit(1);
     }
-    temp = alldevsp;
     if(dev_sel >= 1 && dev_sel<= cntr){
-        for(int i=1;i<=dev_sel;i++){
-            if(dev_sel == i){
-                dev_name = temp->name;
-                break;
-            }
-            temp = temp->next;
-        }
+        dev_name = dev_list[dev_sel - 1];
+        // Resolve the PcapPlusPlus device now so the caller can query it
+        // (e.g. interface addresses) before the capture is started.
+        dev = pcpp::PcapLiveDeviceList::getInstance().getPcapLiveDeviceByName(dev_name);
         std::cout << dev_name << " Selected" <<std::endl;
     }else{
         std::cerr << "Value null or range greater :  " << dev_sel << std::endl;
@@ -77,5 +96,6 @@ pcpp::PcapLiveDevice *DevHandler::getDev() const {
 
 DevHandler::DevHandler() {
     //Do nothing
+    dev = nullptr;
 }
 

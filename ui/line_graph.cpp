@@ -75,15 +75,24 @@ void MainWindow::updateSeries() {
     auto x = QDateTime::currentDateTime().toMSecsSinceEpoch();
 
     vector<long> graphList = {tcp_y,udp_y,http_y,icmp_y,ssl_y,ssh_y};
-    graphList = calculateSMA(graphList, 2);
+    graphList = calculateSMA(graphList, 5);
 
     if (total > 0) {
-        TCP->append(x, (graphList.at(0) * 100/total ));
-        UDP->append(x, (graphList.at(1) * 100/total ));
-        HTTP->append(x, (graphList.at(2) * 100/total ));
-        ICMP->append(x, (graphList.at(3) * 100/total ));
-        SSL->append(x, (graphList.at(4) * 100/total ));
-        SSH->append(x, (graphList.at(5) * 100/total ));
+        auto seriesList = ui->Spline->chart()->series();
+        QXYSeries *s0 = qobject_cast<QXYSeries*>(seriesList[0]);
+        QXYSeries *s1 = qobject_cast<QXYSeries*>(seriesList[1]);
+        QXYSeries *s2 = qobject_cast<QXYSeries*>(seriesList[2]);
+        QXYSeries *s3 = qobject_cast<QXYSeries*>(seriesList[3]);
+        QXYSeries *s4 = qobject_cast<QXYSeries*>(seriesList[4]);
+        QXYSeries *s5 = qobject_cast<QXYSeries*>(seriesList[5]);
+        if (s0 && s1 && s2 && s3 && s4 && s5) {
+            s0->append(x, (graphList.at(0) * 100/total ));
+            s1->append(x, (graphList.at(1) * 100/total ));
+            s2->append(x, (graphList.at(2) * 100/total ));
+            s3->append(x, (graphList.at(3) * 100/total ));
+            s4->append(x, (graphList.at(4) * 100/total ));
+            s5->append(x, (graphList.at(5) * 100/total ));
+        }
     }
 
     // adjusting the axis range to keep the latest data visible

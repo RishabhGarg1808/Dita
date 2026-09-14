@@ -2,22 +2,26 @@
 #include "core/nethogs/src/cui.h"
 #include "core/nethogs/src/nethogs.cpp"
 #include "../ui_mainwindow.h"
+#include <atomic>
 
-/* DO NOT REMOVE quit_cb and forceExit functions
- * The following functions are used to handle the self-pipe trick.
- * These functions are declared in the main.cpp in nethogs which are currently
- * unavailable due to include errors so the functions are declared here
- * */
+/* Global quit flag for nethogs process loop.
+ * The nethogs code (cui.cpp) calls quit_cb() when user presses 'q' or
+ * refresh limit is reached. This flag is checked by process_loop()
+ * to cleanly exit the detached thread. */
+static std::atomic<bool> g_nethogs_quit{false};
 
+/* Global quit callback for nethogs - satisfies the declaration in nethogs.h.
+ * Sets the quit flag so process_loop() can detect the shutdown request. */
 void quit_cb(int /* i */) {
     if (self_pipe.second != -1) {
         write(self_pipe.second, "x", 1);
-    } else {
-        exit(0);
     }
+    g_nethogs_quit.store(true, std::memory_order_release);
 }
 
-void forceExit(bool success,const char* msg,...) {
+/* Global forceExit for nethogs - satisfies the declaration in nethogs.h.
+ * Used by nethogs code for fatal errors. */
+void forceExit(bool success, const char* msg, ...) {
     if ((!tracemode) && (!DEBUG)) {
         exit_ui();
     }
@@ -36,20 +40,19 @@ void forceExit(bool success,const char* msg,...) {
 
 std::list<handle> handles;
 
-//Utils function to dislapy error messages in ui
+//Utils function to display error messages in ui (M2: use stack-allocated to avoid leak)
 void Nethogs::error_msg(const std::string &msg) {
-    auto messagebox = new QErrorMessage();
-    messagebox->setWindowTitle("Network Utilization Error");
-    messagebox->showMessage(QString::fromStdString(msg));
-    messagebox->exec();
+    QErrorMessage messagebox(nullptr);
+    messagebox.setWindowTitle("Network Utilization Error");
+    messagebox.showMessage(QString::fromStdString(msg));
+    messagebox.exec();
 }
 
 void Nethogs::quit_cb(int /* i */) {
     if (self_pipe.second != -1) {
         write(self_pipe.second, "x", 1);
-    } else {
-        exit(0);
     }
+    g_nethogs_quit.store(true, std::memory_order_release);
 }
 
 void Nethogs::forceExit(bool success,const char *msg,...) {
@@ -256,7 +259,7 @@ void Nethogs::update() {
 }
 
 void Nethogs::process_loop() {
-    while (true) {
+    while (!g_nethogs_quit.load(std::memory_order_acquire)) {
         bool packets_read = false;
 
         for (auto current_handle = handles.begin(); current_handle != handles.end(); current_handle++) {
@@ -301,8 +304,14 @@ void Nethogs::process_loop() {
 
 void Nethogs::start() {
     std::cout << "Starting network utilization\n";
-    std::thread netProcess(&Nethogs::process_loop, this);
-    netProcess.detach();
+    netProcess = std::thread(&Nethogs::process_loop, this);
+}
+
+void Nethogs::stop() {
+    g_nethogs_quit.store(true, std::memory_order_release);
+    if (netProcess.joinable()) {
+        netProcess.join();
+    }
 }
 
 void MainWindow::initNetUtil() {

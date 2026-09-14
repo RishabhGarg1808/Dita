@@ -84,15 +84,17 @@ public:
     next = m_next;
     sa_family = AF_INET;
     string = (char *)malloc(16);
-    inet_ntop(AF_INET, &m_addr, string, 15);
+    // "255.255.255.255" needs 15 chars + NUL
+    inet_ntop(AF_INET, &m_addr, string, 16);
   }
-  /* this constructor takes an char address[33] */
+  /* this constructor takes a pointer to in6_addr */
   local_addr(struct in6_addr *m_addr, local_addr *m_next = NULL) {
     addr6 = *m_addr;
     next = m_next;
     sa_family = AF_INET6;
     string = (char *)malloc(64);
-    inet_ntop(AF_INET6, &m_addr, string, 63);
+    // m_addr is already a pointer to the 16-byte address
+    inet_ntop(AF_INET6, m_addr, string, 64);
   }
 
   bool contains(const in_addr_t &n_addr);

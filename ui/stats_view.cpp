@@ -4,7 +4,7 @@
 #include "mainwindow.h"
 #include "../ui_mainwindow.h"
 
-void *MainWindow::initStats(){
+void MainWindow::initStats(){
     //Tamper the below html builder at your own risk
     QString htmlTemplate = R"(
           <div style='text-align: center;'><h3>INTERFACE STATS</h3></div>
@@ -39,18 +39,24 @@ void *MainWindow::initStats(){
                 </tr>
     )";
 
+    // DNS servers may be empty (e.g. some containers/VMs); avoid .at(0) on an empty list
+    QString dnsText = QStringLiteral("N/A");
+    auto dnsServers = DevHandle->getDev()->getDnsServers();
+    if (!dnsServers.empty()) {
+        dnsText = QString::fromStdString(dnsServers.at(0).toString());
+    }
+
     QString htmlContent = htmlTemplate.arg(
             QString::fromStdString(DevHandle->getDev()->getName()),
             QString::fromStdString(DevHandle->getDev()->getIPv4Address().toString()),
             QString::fromStdString(DevHandle->getDev()->getIPv6Address().toString()),
             QString::fromStdString(DevHandle->getDev()->getMacAddress().toString()),
             QString::fromStdString(DevHandle->getDev()->getDefaultGateway().toString()),
-            QString::fromStdString(DevHandle->getDev()->getDnsServers().at(0).toString()),
+            dnsText,
             QString::number(DevHandle->getDev()->getMtu())
             );
     ui->devStats->setHtml(htmlContent);
-    return nullptr;
-}
+    }
 
 void MainWindow::initDevList(){
     std::vector<std::string> dev_list = DevHandle->get_dev_list();
@@ -66,9 +72,11 @@ void MainWindow::reinit() {
     std::cout << "Re-initializing the device" << std::endl;
     DevHandle->stop_capture();
     DevHandle->select_dev(ui->comboBox->currentIndex()+1);
-    DevHandle->start_capture();
+    // Update the analyzer's interface addresses before the new capture thread
+    // starts (it reads them for every packet).
     analyzer->setInterfaceIpv4(DevHandle->getDev()->getIPv4Address().toString());
     analyzer->setInterfaceIpv6(DevHandle->getDev()->getIPv6Address().toString());
+    DevHandle->start_capture();
     initStats();
 }
 

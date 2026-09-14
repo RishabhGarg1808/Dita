@@ -6,13 +6,23 @@ void Analyzer::icmp_analyze(pcpp::Packet *Packet) {
     if(Packet->isPacketOfType(pcpp::ICMP )
        || Packet->isPacketOfType(pcpp::ICMPv6) ){
         string srcIP = utils->sourceIPExtractor(Packet);
+        string destIP = utils->destIPExtractor(Packet);
 
-        //Make sure that only Incoming packets are analyzed
+        // Track both incoming and outgoing ICMP (B5 fix)
+        // Incoming: external IP sends to our interface
         if(srcIP != interface_ipv4 && srcIP != interface_ipv6){
-            if(checkInMap(utils->sourceIPExtractor(Packet))){
+            if(checkInMap(srcIP)){
                 ping_map[srcIP] = ++ping_map[srcIP];
             }else{
                 ping_map[srcIP] = 1;
+            }
+        }
+        // Outgoing: our interface sends to external IP
+        else if(destIP != interface_ipv4 && destIP != interface_ipv6){
+            if(checkInMap(destIP)){
+                ping_map[destIP] = ++ping_map[destIP];
+            }else{
+                ping_map[destIP] = 1;
             }
         }
     }

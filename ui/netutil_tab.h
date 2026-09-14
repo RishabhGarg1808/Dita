@@ -37,6 +37,7 @@ private:
     fd_set pc_loop_fd_set{};
     std::vector<int> pc_loop_fd_list;
     bool pc_loop_use_select = true;
+    std::thread netProcess;
     int promisc = 0;
     bool all = true;
     char *filter = NULL;
@@ -61,5 +62,6 @@ private:
 public:
     Nethogs();
     void start();
+    void stop();
 };
 #endif //DITA_NETUTIL_TAB_H

@@ -1,7 +1,7 @@
 #include "Graph.h"
 
 void Graph::onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, void *cookie) {
-    auto* stats = (ServiceStats*)cookie;
+    auto* stats = (Graph*)cookie;
     pcpp::Packet parsedPacket(packet);
     consumePacket(parsedPacket);
     analyzer->packetSwitcher(&parsedPacket);

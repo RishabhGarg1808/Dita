@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QStandardItemModel>
 #include <QLineSeries>
+#include <QtCharts/QSplineSeries>
 #include <QDateTime>
 #include <QTreeWidget>
 #include "DevHandler.h"
@@ -16,6 +17,7 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+class Nethogs;
 class MainWindow : public QWidget {
 Q_OBJECT
 public:
@@ -26,6 +28,7 @@ private slots:
     void reinit();
     void updateNetUtil(QVector<Line*>, int);
     void updateServiceStats();
+    void cleanupDeadConnections();
     void updateAlertsTabPing(const string&);
     void updateAlertsTabSSH(const string&,const string&);
 
@@ -35,9 +38,10 @@ private:
     Graph *graph;
     QString unit = " KBps";
     Ui::MainWindow *ui;
-    QLineSeries *TCP{}, *UDP{}, *HTTP{}, *ICMP{}, *SSL{}, *SSH{};
+    QSplineSeries *TCP,*UDP,*HTTP,*ICMP,*SSL,*SSH;
     QTimer *timer,*timer2;
     DevHandler *DevHandle;
+    Nethogs *nethogs;
     QDateTime time = QDateTime::currentDateTime();
     QStandardItemModel *totalModel,*statsModel,*serviceModel,*alertsModel;
     QStandardItem *ssh,*tcp,*udp;
@@ -46,9 +50,9 @@ private:
     QChart *initChart();
     void initDevList();
     void getselectedDev();
-    void *initService();
+    void initService();
     void initNetUtil();
-    void *initStats();
+    void initStats();
 
 //functions  for the service tab
     void update_tcp();

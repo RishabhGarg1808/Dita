@@ -7,7 +7,7 @@
 #include "pcapplusplus/PcapLiveDeviceList.h"
 
 class DevHandler {
-    const char* dev_name;
+    std::string dev_name;
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_if_t *alldevsp,*temp;
     std::vector<std::string> dev_list;
@@ -15,6 +15,7 @@ class DevHandler {
     Graph *graph;
     int cntr=1;
 public:
+    ~DevHandler();
     DevHandler();
     DevHandler(Graph *);
     std::vector<std::string> get_dev_list();

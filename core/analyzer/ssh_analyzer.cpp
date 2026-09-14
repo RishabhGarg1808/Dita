@@ -13,7 +13,7 @@ void Analyzer::sshAnalyze(pcpp::Packet* Packet){
     auto* SSHLayer = Packet->getLayerOfType<pcpp::SSHLayer>();
     auto ip = utils->sourceIPExtractor(Packet);
     if(SSHLayer == NULL){
-        DROPPED_SSH++;
+        // Skip non-SSH layer packets
     }else{
         if(Packet->isPacketOfType(pcpp::TCP)){
             auto *tcpLayer = Packet->getLayerOfType<pcpp::TcpLayer>();
@@ -28,9 +28,8 @@ void Analyzer::sshAnalyze(pcpp::Packet* Packet){
                     emit_ssh(ip,"Connected");
                 }
             }
-        }else{
-            DROPPED_SSH++;
         }
+        // Non-TCP SSH packets are skipped
     }
 }
 

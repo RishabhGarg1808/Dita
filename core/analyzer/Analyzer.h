@@ -5,6 +5,7 @@
 #include "pcapplusplus/Packet.h"
 #include "pcapplusplus/SystemUtils.h"
 #include "QObject"
+#include <QReadWriteLock>
 
 #include "utils/Utils.h"
 
@@ -22,13 +23,13 @@ private:
     bool checkInMap(const string &val);
     map<string,int> ping_map;
     Utils *utils = new Utils;
-    int DROPPED_SSH=0;
 public:
     map<pair<string,string> ,pair<int,int>> TCP_ConnectionMap_incoming;
     map<pair<string,string> ,pair<int,int>> TCP_ConnectionMap_outgoing;
     map<string ,pair<int,int>> UDP_ConnectionMap_incoming;
     map<string ,pair<int,int>> UDP_ConnectionMap_outgoing;
     map<string ,string> SSH_ConnectionMap;
+    mutable QReadWriteLock mapLock;
 public:
     string pingSrc;
     //main function which branches to other sub-functions
@@ -52,6 +53,7 @@ public:
     bool check_list(const std::string& );
 
     //other util functions
+    void cleanupDeadConnections();
     static string getProtocolAsString(pcpp::ProtocolType);
 
     const map<pair<string, string>, pair<int, int>> &getTcpConnectionMapIncoming() const;
@@ -61,6 +63,13 @@ public:
     const map<string, pair<int, int>> &getUdpConnectionMapIncoming() const;
 
     const map<string, pair<int, int>> &getUdpConnectionMapOutgoing() const;
+
+    // Methods that return copies of maps (thread-safe)
+    map<pair<string,string>, pair<int,int>> getTcpIncomingCopy() const;
+    map<pair<string,string>, pair<int,int>> getTcpOutgoingCopy() const;
+    map<string, pair<int,int>> getUdpIncomingCopy() const;
+    map<string, pair<int,int>> getUdpOutgoingCopy() const;
+    map<string, string> getSshCopy() const;
 };
 
 #endif //DITA_ANALYZER_H

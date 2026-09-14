@@ -7,11 +7,6 @@
 using namespace std;
 
 class Utils {
-
-    map<string,string>::iterator SSH_it;
-    map<pair<string,string> ,pair<int,int>>::iterator TCP_it;
-    map<string ,pair<int,int>>::iterator UDP_it;
-
 public:
 //    template<typename type,typename key,typename value>
 //    void update_map (const &type maptype,const &key mapkey,const &value mapvalue);
