@@ -67,7 +67,7 @@ void DevHandler::start_capture() {
 
     //bind the onPacketArrives function to a static block and pass it to the startCapture
     function<void(pcpp::RawPacket*, pcpp::PcapLiveDevice*, void*)> binded = bind(&Graph::onPacketArrives,graph,placeholders::_1,placeholders::_2,placeholders::_3);
-    dev->startCapture(binded,&graph);
+    dev->startCapture(binded, graph);
 }
 
 void DevHandler::select_dev(int dev_sel){

@@ -1,45 +1,80 @@
 #include "Graph.h"
 
 void Graph::onPacketArrives(pcpp::RawPacket *packet, pcpp::PcapLiveDevice *dev, void *cookie) {
-    auto* stats = (Graph*)cookie;
+    // `this` is the Graph the callback was bound to in DevHandler::start_capture.
+    // (The cookie is informational; member access goes through `this`.)
     pcpp::Packet parsedPacket(packet);
     consumePacket(parsedPacket);
     analyzer->packetSwitcher(&parsedPacket);
 }
 
 void Graph::consumePacket(pcpp::Packet &packet) {
-    ServiceSt.totalPacketCount++;
+    totalCount++;
     if(packet.isPacketOfType(pcpp::TCP))
-        ServiceSt.tcpPacketCount++;
+        tcpCount++;
     if(packet.isPacketOfType(pcpp::UDP))
-        ServiceSt.udpPacketCount++;
+        udpCount++;
     if(packet.isPacketOfType(pcpp::HTTP))
-        ServiceSt.httpPacketCount++;
+        httpCount++;
     if(packet.isPacketOfType(pcpp::ICMP))
-        ServiceSt.icmpPacketCount++;
+        icmpCount++;
     if(packet.isPacketOfType(pcpp::ICMPv6))
-        ServiceSt.icmpPacketCount++;
+        icmpCount++;
     if(packet.isPacketOfType(pcpp::SSL))
-        ServiceSt.sslPacketCount++;
+        sslCount++;
     if(packet.isPacketOfType(pcpp::SSH))
-        ServiceSt.sshPacketCount++;
+        sshCount++;
 }
 
 Graph::ServiceStats Graph::getServiceStats() const {
-    return ServiceSt;
+    ServiceStats s;
+    s.tcpPacketCount = tcpCount.load();
+    s.udpPacketCount = udpCount.load();
+    s.httpPacketCount = httpCount.load();
+    s.icmpPacketCount = icmpCount.load();
+    s.sslPacketCount = sslCount.load();
+    s.sshPacketCount = sshCount.load();
+    s.totalPacketCount = totalCount.load();
+    return s;
 }
 
-void Graph::reset() {
-    ServiceSt.tcpPacketCount = 0;
-    ServiceSt.udpPacketCount = 0;
-    ServiceSt.httpPacketCount = 0;
-    ServiceSt.icmpPacketCount = 0;
-    ServiceSt.sslPacketCount = 0;
-    ServiceSt.sshPacketCount = 0;
-    ServiceSt.totalPacketCount = 0;
+Graph::ServiceRates Graph::sampleRates() {
+    ServiceRates rates;
+    auto now = std::chrono::steady_clock::now();
+    double dt = std::chrono::duration<double>(now - lastSampleTime).count();
+
+    long long tcp = tcpCount.load();
+    long long udp = udpCount.load();
+    long long http = httpCount.load();
+    long long icmp = icmpCount.load();
+    long long ssl = sslCount.load();
+    long long ssh = sshCount.load();
+    long long total = totalCount.load();
+
+    if (!hasBaseline || dt <= 0) {
+        // First sample: just establish the baseline.
+        hasBaseline = true;
+    } else {
+        rates.tcp = (tcp - lastTcp) / dt;
+        rates.udp = (udp - lastUdp) / dt;
+        rates.http = (http - lastHttp) / dt;
+        rates.icmp = (icmp - lastIcmp) / dt;
+        rates.ssl = (ssl - lastSsl) / dt;
+        rates.ssh = (ssh - lastSsh) / dt;
+        rates.total = (total - lastTotal) / dt;
+    }
+
+    lastTcp = tcp;
+    lastUdp = udp;
+    lastHttp = http;
+    lastIcmp = icmp;
+    lastSsl = ssl;
+    lastSsh = ssh;
+    lastTotal = total;
+    lastSampleTime = now;
+    return rates;
 }
 
 Graph::Graph(Analyzer *analyze) {
     this->analyzer = analyze;
-    this->reset();
 }

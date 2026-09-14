@@ -58,7 +58,6 @@ private:
     void update_tcp();
     void update_udp();
     void update_ssh();
-    vector<long> calculateSMA(const vector<long>& graphList, int windowSize);
 
     //utility function to check the type specified by auto
     std::string demangled(std::string const& sym) {
