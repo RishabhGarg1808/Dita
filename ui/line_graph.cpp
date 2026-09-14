@@ -79,19 +79,24 @@ void MainWindow::updateSeries() {
 
     if (total > 0) {
         auto seriesList = ui->Spline->chart()->series();
-        QXYSeries *s0 = qobject_cast<QXYSeries*>(seriesList[0]);
-        QXYSeries *s1 = qobject_cast<QXYSeries*>(seriesList[1]);
-        QXYSeries *s2 = qobject_cast<QXYSeries*>(seriesList[2]);
-        QXYSeries *s3 = qobject_cast<QXYSeries*>(seriesList[3]);
-        QXYSeries *s4 = qobject_cast<QXYSeries*>(seriesList[4]);
-        QXYSeries *s5 = qobject_cast<QXYSeries*>(seriesList[5]);
-        if (s0 && s1 && s2 && s3 && s4 && s5) {
-            s0->append(x, (graphList.at(0) * 100/total ));
-            s1->append(x, (graphList.at(1) * 100/total ));
-            s2->append(x, (graphList.at(2) * 100/total ));
-            s3->append(x, (graphList.at(3) * 100/total ));
-            s4->append(x, (graphList.at(4) * 100/total ));
-            s5->append(x, (graphList.at(5) * 100/total ));
+        QXYSeries *series[] = {
+            qobject_cast<QXYSeries*>(seriesList[0]),
+            qobject_cast<QXYSeries*>(seriesList[1]),
+            qobject_cast<QXYSeries*>(seriesList[2]),
+            qobject_cast<QXYSeries*>(seriesList[3]),
+            qobject_cast<QXYSeries*>(seriesList[4]),
+            qobject_cast<QXYSeries*>(seriesList[5]),
+        };
+        // Points are added once per second and the X-axis shows the last
+        // 600 seconds, so keep a small headroom and drop older points to
+        // stop the series (and render cost) growing without bound.
+        constexpr int kMaxPoints = 650;
+        for (int s = 0; s < 6; ++s) {
+            if (!series[s]) continue;
+            series[s]->append(x, (graphList.at(s) * 100 / total));
+            while (series[s]->count() > kMaxPoints) {
+                series[s]->remove(0);
+            }
         }
     }
 

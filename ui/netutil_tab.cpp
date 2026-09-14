@@ -342,69 +342,54 @@ void MainWindow::initNetUtil() {
 }
 
 void MainWindow::updateNetUtil(QVector<Line *> data, int n) {
-    for(int i = 0; i < n; i++){
-        Line *line = data[i];
-        if (i < statsModel->rowCount()) {
-            // Update existing and if pid == 0 skip
-            if(line->m_pid == 0) continue;
-            statsModel->item(i, 0)->setText(QString::fromStdString(std::to_string(line->m_pid)));
-            statsModel->item(i, 1)->setText(QString::fromStdString(std::to_string(line->m_uid)));
-            statsModel->item(i, 2)->setText(QString::fromStdString(line->m_name));
-            statsModel->item(i, 3)->setText(QString::fromStdString(line->devicename));
-            statsModel->item(i, 4)->setText(QString::number(line->sent_value,'f',2)+ unit);
-            statsModel->item(i, 5)->setText(QString::number(line->recv_value,'f',2)+ unit);
-        } else {
-            // Add new row if it doesn't exist and check for pid != 0
-            if(line->m_pid == 0) continue;
-            QList<QStandardItem *> items;
-            items.append(new QStandardItem(QString::fromStdString(std::to_string(line->m_pid))));
-            items.append(new QStandardItem(QString::fromStdString(std::to_string(line->m_uid))));
-            items.append(new QStandardItem(QString::fromStdString(line->m_name)));
-            items.append(new QStandardItem(QString::fromStdString(line->devicename)));
-            items.append(new QStandardItem(QString::number(line->sent_value,'f',2) + unit));
-            items.append(new QStandardItem(QString::number(line->recv_value,'f',2) +unit ));
-            statsModel->appendRow(items);
-        }
-    }
-    float total_sent =0;
-    float totalReceive=0;
-    float sendSpeed = 0;
-    float receiveSpeed = 0;
-
-    for(int i = 0; i < statsModel->rowCount(); i++){
-        QStandardItem* sent = statsModel->item(i, 4);
-        QStandardItem* recv = statsModel->item(i, 5);
-        total_sent += (sent->text().split(unit)).first().toFloat();
-        totalReceive += (recv->text().split(unit)).first().toFloat();
+    // Raw values arrive in KBps (nethogs runs with VIEWMODE_KBPS).
+    // Totals are computed from the raw values, not by re-parsing cell
+    // text, which broke after the display unit changed.
+    float total_sent = 0, totalReceive = 0;
+    QList<int> valid;
+    for (int i = 0; i < n; i++) {
+        if (data[i]->m_pid == 0) continue;
+        valid.append(i);
+        total_sent += data[i]->sent_value;
+        totalReceive += data[i]->recv_value;
     }
 
-    auto adjustCols = [&](int coeff){
-        for(int i =0;i<statsModel->rowCount();i++){
-            QStandardItem *sent = statsModel->item(i, 4);
-            QStandardItem *recv = statsModel->item(i, 5);
-            sent->setText(QString::number(sent->text().toFloat()/coeff,'f',2) + unit);
-            recv->setText(QString::number(recv->text().toFloat()/coeff,'f',2) + unit);
-        }
-    };
-
-    if(total_sent > 2048 || totalReceive > 2048){
-        unit = " MBps";
-        adjustCols(1024);
-        sendSpeed = total_sent/1024;
-        receiveSpeed = totalReceive/1024;
-    }else if(total_sent > (2*1024*1024) || totalReceive > (2*1024*1024)){
+    // Choose the display unit from the larger total.
+    float peak = std::max(total_sent, totalReceive);
+    float coeff = 1.0f;
+    if (peak > 2.0f * 1024 * 1024) {
         unit = " GBps";
-        adjustCols(1024*1024);
-        sendSpeed = total_sent/(1024*1024);
-        receiveSpeed = totalReceive/(1024*1024);
-    }else if(total_sent < 2048 || totalReceive < 2048){
+        coeff = 1024.0f * 1024.0f;
+    } else if (peak > 2048) {
+        unit = " MBps";
+        coeff = 1024.0f;
+    } else {
         unit = " KBps";
-        sendSpeed = total_sent;
-        receiveSpeed = totalReceive;
+        coeff = 1.0f;
     }
 
-    QString proc= QString::fromStdString("\u2211 Processes : " + std::to_string(statsModel->rowCount()));
-    QString sentInfo= QString::fromStdString("\u2211 Sent : " + QString::number(sendSpeed,'f',2).toStdString()  + unit.toStdString());
-    QString recvInfo= QString::fromStdString( "\u2211 Received : " + QString::number(receiveSpeed,'f',2).toStdString() + unit.toStdString());
+    // Rebuild the table from scratch so rows always match the current
+    // snapshot (previously, rows were only appended/updated in place,
+    // leaving stale rows behind when the process count dropped).
+    statsModel->removeRows(0, statsModel->rowCount());
+    for (int idx : valid) {
+        Line *line = data[idx];
+        QList<QStandardItem *> items;
+        items.append(new QStandardItem(QString::number(line->m_pid)));
+        items.append(new QStandardItem(QString::number(line->m_uid)));
+        items.append(new QStandardItem(QString::fromStdString(line->m_name)));
+        items.append(new QStandardItem(QString::fromStdString(line->devicename)));
+        items.append(new QStandardItem(QString::number(line->sent_value / coeff, 'f', 2) + unit));
+        items.append(new QStandardItem(QString::number(line->recv_value / coeff, 'f', 2) + unit));
+        statsModel->appendRow(items);
+    }
+
+    float sendSpeed = total_sent / coeff;
+    float receiveSpeed = totalReceive / coeff;
+    QString proc = QString("\u2211 Processes : %1").arg(valid.size());
+    QString sentInfo = QString("\u2211 Sent : %1%2")
+            .arg(sendSpeed, 0, 'f', 2).arg(unit);
+    QString recvInfo = QString("\u2211 Received : %1%2")
+            .arg(receiveSpeed, 0, 'f', 2).arg(unit);
     totalModel->setHorizontalHeaderLabels(QStringList() << sentInfo << recvInfo << proc);
 }
